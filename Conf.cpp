@@ -48,6 +48,7 @@ m_daemon(false),
 m_rptAddress("127.0.0.1"),
 m_rptPort(62032U),
 m_startNet(6U),
+m_NetMode(6U),
 m_localAddress("127.0.0.1"),
 m_localPort(62031U),
 m_rfTimeout(10U),
@@ -279,6 +280,8 @@ bool CConf::read()
 				m_rptPort = (unsigned int)::atoi(value);
 			else if (::strcmp(key, "StartNet") == 0)
 				m_startNet = (unsigned int)::atoi(value);
+			else if (::strcmp(key, "NetMode") == 0)
+				m_NetMode = (unsigned int)::atoi(value);
 			else if (::strcmp(key, "LocalAddress") == 0)
 				m_localAddress = value;
 			else if (::strcmp(key, "LocalPort") == 0)
@@ -1121,6 +1124,11 @@ unsigned int CConf::getRptPort() const
 unsigned int CConf::getStartNet() const
 {
 	return m_startNet;
+}
+
+unsigned int CConf::getNetMode() const
+{
+	return m_NetMode;
 }
 
 std::string CConf::getLocalAddress() const
