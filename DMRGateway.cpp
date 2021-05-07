@@ -408,28 +408,16 @@ int CDMRGateway::run()
 	LogMessage("MMDVM has connected");
 
 	int StartNet = m_conf.getStartNet();
-	int NetMode = m_conf.getNetMode();
 	if  ( !StartNet  ) StartNet=4;
-	if  ( !NetMode  ) NetMode=0;
 
         selnet = StartNet;
 
-	bool RuleTrace = m_conf.getRuleTrace();
+	bool ruleTrace = m_conf.getRuleTrace();
 
 
         LogInfo("Network %d Selected for StartUp",selnet);
-	LogInfo("Startup NetMode = %d",NetMode);
 
 	ClearNetworks();
-
-//      net1ok = false;
-//	net2ok = false;
-//	net3ok = false;
-//      net4ok = false;
-//	net5ok = false;
-//	net6ok = false;
-//
-//	LogInfo("Rule trace: %s", ruleTrace ? "yes" : "no");
 
         switch(selnet) {
         case 1 : net1ok = true;
@@ -455,7 +443,7 @@ int CDMRGateway::run()
 
 
 
-	bool ruleTrace = m_conf.getRuleTrace();
+//	bool ruleTrace = m_conf.getRuleTrace();
 	LogInfo("Rule trace: %s", ruleTrace ? "yes" : "no");
 
 
@@ -613,7 +601,6 @@ int CDMRGateway::run()
 				unsigned int cnt =0;
 	//	
 				if ( trace ) {
-					if ( RuleTrace ) LogInfo("NetMode = %d",NetMode);
 					LogInfo("Test NetOK Count = %d",cnt);
 					LogInfo("RF transmission: Net=%u, Slot=%u Src=%u Dst=%s%u", selnet, slotNo, srcId, flco == FLCO_GROUP ? "TG" : "", dstId);
 					LogInfo("Net1OK:%s    Net2OK:%s   Net3OK:%s", net1ok ? "yes" : "no", net2ok ? "yes" : "no", net3ok ? "yes" : "no" );

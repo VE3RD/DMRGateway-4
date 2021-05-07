@@ -5,6 +5,7 @@ LocalAddress=127.0.0.1
 LocalPort=62031
 RuleTrace=1
 StartNet=4
+NetMode=0
 Daemon=1
 Debug=1
 RFTimeout=5
@@ -17,7 +18,7 @@ FilePath=/var/log/pi-star
 FileRoot=DMRGateway
 
 [Voice]
-Enabled=0
+Enabled=1
 Language=en_US
 Directory=/usr/local/etc/DMR_Audio
 
@@ -34,9 +35,9 @@ Power=1
 Height=0
 
 [XLX Network]
-Id=0000000
-Startup=000
 Enabled=0
+Id=3023954
+Startup=000
 File=/usr/local/etc/XLXHosts.txt
 Port=62030
 Password=passw0rd
@@ -51,30 +52,27 @@ UserControl=1
 [DMR Network 1]
 Enabled=1
 Name=BM_3103_United_States
-Id=0000000
+Id=302395441
 Address=3103.master.brandmeister.network
-Password="KKKKKKK"
-TGRewrite0=2,1,2,1,9999999
-TGRewrite1=2,11000001,2,1,999999
+Password="VK2gpe12"
+TGRewrite1=2,1,2,1,999999
 PCRewrite0=2,9990,2,9990,1
 PCRewrite1=2,310997,2,310997,1
-PCRewrite2=2,110310997,310997
-SrcRewrite0=2,9990,2,YourCall,1
-SrcRewrite1=2,310997,2,YourCall,1
+SrcRewrite0=2,9990,2,9990,1
+SrcRewrite1=2,310997,2,310997,1
 Port=62031
 Local=62035
 Location=0
 Debug=0
 
 [DMR Network 2]
-Enabled=0
+Enabled=1
 Name=DMR+_IPSC2-CAN-TRBO
-Id=0000000
+Id=302395442
 Address=209.226.17.178
 Password="PASSWORD"
 Port=55555
-TGRewrite0=2,1,2,1,9999999
-TGRewrite1=2,12000001,2,1,999999
+TGRewrite0=2,1,2,1,999999
 Location=0
 
 [DMR Network 3]
@@ -84,8 +82,7 @@ Address=zeta4.duckdns.org
 Port=62031
 Local=62039
 TGRewrite0=2,1,2,1,9999999
-TGRewrite1=2,13000001,2,1,999999
-Password=KKKKKK
+Password=pissw0rd
 Location=0
 Debug=0
 
@@ -94,14 +91,12 @@ Enabled=1
 Name=TGIF_Network
 Address=tgif.network
 Port=62031
-Local=62038
-Id=0000000
+Local=62036
+Id=302395444
 #PassAllTg=2
 TGRewrite0=2,1,2,1,9999999
 TGRewrite1=2,14000001,2,1,999999
-PCRewrite0=2,9990,9990,1
-SRCRewrite=2,9990,YourCall,1
-Password=KKKKKKK
+Password=82B843F5CF578214
 Location=0
 Debug=1
 
@@ -110,11 +105,11 @@ Enabled=1
 Name=MNet_Network
 Address=mnet.hopto.org
 Port=62031
-Local=62039
-TGRewrite2=2,1,2,1,9999999
-TGRewrite3=2,15000001,2,1,999999
-Password=KKKKKK
-Id=00000000
+Local=62037
+TGRewrite0=2,1,2,1,9999999
+TGRewrite1=2,15000001,2,1,999999
+Password=M262vRQZ889baG1
+Id=302395445
 Location=0
 Debug=1
 
