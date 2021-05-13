@@ -60,7 +60,6 @@ const unsigned char COLOR_CODE = 3U;
 static bool m_killed = false;
 static int  m_signal = 0;
 unsigned int rdstId = 0;
-static int ctrlCode = 0;
 static int selnet = 0;
 unsigned int  storedtg =0;	
 static bool net1ok = false;
@@ -69,6 +68,14 @@ static bool net3ok = false;
 static bool net4ok = false;
 static bool net5ok = false;
 static bool net6ok = false;
+//static bool allnetok = false;
+
+static bool rf1ok = false;
+static bool rf2ok = false;
+static bool rf3ok = false;
+static bool rf4ok = false;
+static bool rf5ok = false;
+static bool rf6ok = false;
 static bool ok2tx = false;
 static int  locknet = 0;
 
@@ -421,22 +428,22 @@ int CDMRGateway::run()
 
         switch(selnet) {
         case 1 : net1ok = true;
-	LogInfo("Srartup Net1 Test %d", selnet);
+	LogInfo("Startup Net1 Test %d", selnet);
 		break;
         case 2 : net2ok = true;
-	LogInfo("Srartup Net2 Test %d", selnet);
+	LogInfo("Startup Net2 Test %d", selnet);
 		break;
         case 3 : net3ok = true;
-	LogInfo("Srartup Net3 Test %d", selnet);
+	LogInfo("Startup Net3 Test %d", selnet);
 		break;
         case 4 : net4ok = true;
-	LogInfo("Srartup Net4 Test %d", selnet);
+	LogInfo("Startup Net4 Test %d", selnet);
 		break;
         case 5 : net5ok = true;
-	LogInfo("Srartup Net5 Test %d", selnet);
+	LogInfo("Startup Net5 Test %d", selnet);
 		break;
         case 6 : net6ok = true;
-	LogInfo("Srartup Net6 Test %d", selnet);
+	LogInfo("Startup Net6 Test %d", selnet);
 		break;
         }
 
@@ -539,7 +546,6 @@ int CDMRGateway::run()
 			unsigned int dstId = data.getDstId();
 			FLCO flco = data.getFLCO();
 
-
 				bool trace = true;
 				if (ruleTrace && (srcId != rfSrcId[slotNo] || dstId != rfDstId[slotNo])) {
 					rfSrcId[slotNo] = srcId;
@@ -551,21 +557,44 @@ int CDMRGateway::run()
 					LogDebug("RF transmission RX: Net=%u, Slot=%u Src=%u Dst=%s%u", selnet, slotNo, srcId, flco == FLCO_GROUP ? "TG" : "", dstId);
 
 				PROCESS_RESULT result = RESULT_UNMATCHED;
+				
+				ok2tx=false;
 
-		  		if ( dstId >= 9000 && dstId <= 9009){
-					ClearNetworks();
-					storedtg = dstId;
-					ok2tx=false;
-                                	if ( trace ) LogInfo("TESTAA Network keyed: %d", dstId);
-                                	selnet = dstId-9000;
-					if (trace) LogInfo("Selected 9000x Network = %d",selnet);
-  					locknet = selnet;
-					if ( trace ) LogInfo("Network Locked = %d",selnet);
+                                if ( dstId == 9000 ) {
+                                        storedtg = dstId;
+                                        ok2tx=false;
+                                        selnet=0;
+                                        locknet=0;
+ //                                       if (m_dmrNetwork1 ) rf1ok = true;
+ //                                       if (m_dmrNetwork2 ) rf2ok = true;
+ //                                       if (m_dmrNetwork3 ) rf3ok = true;
+ //                                       if (m_dmrNetwork4 ) rf4ok = true;
+ //                                       if (m_dmrNetwork5 ) rf5ok = true;
+ //                                       if (m_dmrNetwork6 ) rf6ok = true;
+                                        if (m_dmrNetwork1 ) net1ok = true;
+                                        if (m_dmrNetwork2 ) net2ok = true;
+                                        if (m_dmrNetwork3 ) net3ok = true;
+                                        if (m_dmrNetwork4 ) net4ok = true;
+                                        if (m_dmrNetwork5 ) net5ok = true;
+                                        if (m_dmrNetwork6 ) net6ok = true;
+
+				} 
+				
+				if ( dstId >= 9001 && dstId <= 9009){
+						ClearNetworks();
+						storedtg = dstId;
+                                		if ( trace && ok2tx ) LogInfo("TESTAA Network keyed: %d", dstId);
+                                		selnet = dstId-9000;
+						if (trace && ok2tx) LogInfo("Selected 900x Network = %d",selnet);
+  						locknet = selnet;
+						if ( trace && ok2tx ) LogInfo("Network Locked = %d",selnet);
+						ok2tx=false;
 				} else {
 					ok2tx=true;
                         	}
+
                        		if ( dstId > 9999999 ) {					
-					ClearNetworks();
+		//			ClearNetworks();
                                 	if ( trace ) LogInfo("Radio TG Keyed = %d",dstId);
                                 	selnet = (( dstId / 1000000 ) -10 );
                                 	if (trace ) LogInfo("Calculated Network = %d",selnet);
@@ -579,38 +608,38 @@ int CDMRGateway::run()
 					rdstId = dstId;
 				}
 				
+				if ( dstId >= 9000 && dstId <= 9008 ) ok2tx = false;
+
 				if ( trace ) LogInfo(" Active Network %d", selnet);
 
 
 				 	switch( selnet ) {
-        					case 1 : if ( m_dmrNetwork1 != NULL )  net1ok=true;
+        					case 1 : if ( m_dmrNetwork1 != NULL )  rf1ok=true;
 							break;
-        					case 2 : if ( m_dmrNetwork2 != NULL )  net2ok=true;
+        					case 2 : if ( m_dmrNetwork2 != NULL )  rf2ok=true;
 							break;
-        					case 3 : if ( m_dmrNetwork3 != NULL )  net3ok=true;
+        					case 3 : if ( m_dmrNetwork3 != NULL )  rf3ok=true;
 							break;
-        					case 4 : if ( m_dmrNetwork4 != NULL )  net4ok=true;
+        					case 4 : if ( m_dmrNetwork4 != NULL )  rf4ok=true;
 							break;
-        					case 5 : if ( m_dmrNetwork5 != NULL )  net5ok=true;
+        					case 5 : if ( m_dmrNetwork5 != NULL )  rf5ok=true;
 							break;
-        					case 6 : if ( m_dmrNetwork6 != NULL )  net6ok=true;
+        					case 6 : if ( m_dmrNetwork6 != NULL )  rf6ok=true;
 							break;
 
 					}
 
-				unsigned int cnt =0;
 	//	
 				if ( trace ) {
-					LogInfo("Test NetOK Count = %d",cnt);
 					LogInfo("RF transmission: Net=%u, Slot=%u Src=%u Dst=%s%u", selnet, slotNo, srcId, flco == FLCO_GROUP ? "TG" : "", dstId);
-					LogInfo("Net1OK:%s    Net2OK:%s   Net3OK:%s", net1ok ? "yes" : "no", net2ok ? "yes" : "no", net3ok ? "yes" : "no" );
-					LogInfo("Net4OK:%s    Net5OK:%s   Net6OK:%s", net4ok ? "yes" : "no", net5ok ? "yes" : "no", net6ok ? "yes" : "no" );
+					LogInfo("RF1OK:%s    RF2OK:%s   RF3OK:%s", rf1ok ? "yes" : "no ", rf2ok ? "yes" : "no ", rf3ok ? "yes" : "no " );
+					LogInfo("RF4OK:%s    RF5OK:%s   RF6OK:%s", rf4ok ? "yes" : "no ", rf5ok ? "yes" : "no ", rf6ok ? "yes" : "no " );
 					LogInfo("Network Locked = %d", locknet);
 				}
 
 
 
-				if (m_dmrNetwork1 != NULL && net1ok) {
+				if (m_dmrNetwork1 != NULL && rf1ok) {
 
 					// Rewrite the slot and/or TG or neither
 					for (std::vector<CRewrite*>::iterator it = m_dmr1RFRewrites.begin(); it != m_dmr1RFRewrites.end(); ++it) {
@@ -621,8 +650,8 @@ int CDMRGateway::run()
 						}
 					}
 
-					if (result == RESULT_MATCHED && net1ok && ok2tx) {
-							if (trace) LogInfo("Network 1 Matched %d & Net1OK %s",selnet,net1ok ? "yes" : "no");
+					if (result == RESULT_MATCHED && rf1ok && ok2tx) {
+							if (trace) LogInfo("Network 1 Matched %d & rf1ok %s",selnet,rf1ok ? "yes" : "no");
 
 						if (m_status[slotNo] == DMRGWS_NONE || m_status[slotNo] == DMRGWS_DMRNETWORK1) {
 							rewrite(m_dmr1SrcRewrites, data, trace);
@@ -636,7 +665,7 @@ int CDMRGateway::run()
 					}
 				}
 
-				if (result == RESULT_UNMATCHED && net2ok) {
+				if (result == RESULT_UNMATCHED && rf2ok) {
 					if (m_dmrNetwork2 != NULL) {
 						// Rewrite the slot and/or TG or neither
 						for (std::vector<CRewrite*>::iterator it = m_dmr2RFRewrites.begin(); it != m_dmr2RFRewrites.end(); ++it) {
@@ -647,8 +676,8 @@ int CDMRGateway::run()
 							}
 						}
 
-						if (result == RESULT_MATCHED && net2ok && ctrlCode ==0) {
-							if (trace) LogInfo("Network 2 Matched %d & Net2OK %s",selnet,net2ok  ? "yes" : "no");
+						if (result == RESULT_MATCHED && rf2ok && ok2tx) {
+							if (trace) LogInfo("Network 2 Matched %d & rf1ok %s",selnet,rf2ok  ? "yes" : "no");
 
 							if (m_status[slotNo] == DMRGWS_NONE || m_status[slotNo] == DMRGWS_DMRNETWORK2) {
 								rewrite(m_dmr2SrcRewrites, data, trace);
@@ -663,7 +692,7 @@ int CDMRGateway::run()
 					}
 				}
 
-				if (result == RESULT_UNMATCHED && net3ok) {
+				if (result == RESULT_UNMATCHED && rf3ok) {
 					if (m_dmrNetwork3 != NULL) {
 						// Rewrite the slot and/or TG or neither
 
@@ -675,8 +704,8 @@ int CDMRGateway::run()
 							}
 						}
 
-						if (result == RESULT_MATCHED && net3ok && ok2tx) {
-							if (trace) LogInfo("Network 3 Matched %d & Net3OK %s",selnet,net3ok ? "yes" : "no");
+						if (result == RESULT_MATCHED && rf3ok && ok2tx) {
+							if (trace) LogInfo("Network 3 Matched %d & rf3ok %s",selnet,rf3ok ? "yes" : "no");
 
 							if (m_status[slotNo] == DMRGWS_NONE || m_status[slotNo] == DMRGWS_DMRNETWORK3) {
 								rewrite(m_dmr3SrcRewrites, data, trace);
@@ -691,7 +720,7 @@ int CDMRGateway::run()
 					}
 				}
 ///////////////////////////
-				if (result == RESULT_UNMATCHED && net4ok) {
+				if (result == RESULT_UNMATCHED && rf4ok) {
 					if (m_dmrNetwork4 != NULL) {
 						// Rewrite the slot and/or TG or neither
 						for (std::vector<CRewrite*>::iterator it = m_dmr4RFRewrites.begin(); it != m_dmr4RFRewrites.end(); ++it) {
@@ -702,8 +731,8 @@ int CDMRGateway::run()
 							}
 						}
 
-						if (result == RESULT_MATCHED && net4ok && ok2tx) {
-							if (trace) LogInfo("Network 4 Matched %d & Net4OK %s",selnet,net4ok ? "yes" : "no");
+						if (result == RESULT_MATCHED && rf4ok && ok2tx) {
+							if (trace) LogInfo("Network 4 Matched %d & rf4ok %s",selnet,rf4ok ? "yes" : "no");
 							if (m_status[slotNo] == DMRGWS_NONE || m_status[slotNo] == DMRGWS_DMRNETWORK4) {
 								rewrite(m_dmr4SrcRewrites, data, trace);
 								m_dmrNetwork4->write(data);
@@ -716,7 +745,7 @@ int CDMRGateway::run()
 					}
 				}
 ////////////////////////////
-				if (result == RESULT_UNMATCHED && net5ok) {
+				if (result == RESULT_UNMATCHED && rf5ok) {
 					if (m_dmrNetwork5 != NULL) {
 						// Rewrite the slot and/or TG or neither
 						for (std::vector<CRewrite*>::iterator it = m_dmr5RFRewrites.begin(); it != m_dmr5RFRewrites.end(); ++it) {
@@ -727,8 +756,8 @@ int CDMRGateway::run()
 							}
 						}
 
-						if (result == RESULT_MATCHED && net5ok && ok2tx) {
-							if (trace) LogInfo("Network 5 Matched %d & Net5OK %s",selnet,net5ok ? "yes" : "no");
+						if (result == RESULT_MATCHED && rf5ok && ok2tx) {
+							if (trace) LogInfo("Network 5 Matched %d & rf5ok %s",selnet,rf5ok ? "yes" : "no");
 							if (m_status[slotNo] == DMRGWS_NONE || m_status[slotNo] == DMRGWS_DMRNETWORK5) {
 								rewrite(m_dmr5SrcRewrites, data, trace);
 								m_dmrNetwork5->write(data);
@@ -741,7 +770,7 @@ int CDMRGateway::run()
 					}
 				}
 
-				if (result == RESULT_UNMATCHED && net6ok) {
+				if (result == RESULT_UNMATCHED && rf6ok) {
 					if (m_dmrNetwork6 != NULL) {
 						// Rewrite the slot and/or TG or neither
 
@@ -753,9 +782,9 @@ int CDMRGateway::run()
 							}
 						}
 
-						if (result == RESULT_MATCHED && net6ok && ok2tx) {
-							if (trace) LogInfo("Network 6 Matched %d & Net6OK %s",selnet,net6ok ? "yes" : "no");
-//	LogInfo("Net6OK %s", net6ok ? "yes" : "no");
+						if (result == RESULT_MATCHED && rf6ok && ok2tx) {
+							if (trace) LogInfo("Network 6 Matched %d & rf6ok %s",selnet,rf6ok ? "yes" : "no");
+//	LogInfo("rf6ok %s", rf6ok ? "yes" : "no");
 
 							if (m_status[slotNo] == DMRGWS_NONE || m_status[slotNo] == DMRGWS_DMRNETWORK6) {
 								rewrite(m_dmr6SrcRewrites, data, trace);
@@ -768,7 +797,7 @@ int CDMRGateway::run()
 						}
 					}
 				}
-				if (result == RESULT_UNMATCHED && net1ok) {
+				if (result == RESULT_UNMATCHED && rf1ok) {
 					if (m_dmrNetwork1 != NULL) {
 
 						for (std::vector<CRewrite*>::iterator it = m_dmr1Passalls.begin(); it != m_dmr1Passalls.end(); ++it) {
@@ -779,8 +808,8 @@ int CDMRGateway::run()
 							}
 						}
 
-						if (result == RESULT_MATCHED && net1ok && ok2tx) {
-							if (trace) LogInfo("Network 1 Matched PassAll %d & Net1OK %s",selnet,net2ok  ? "yes" : "no");
+						if (result == RESULT_MATCHED && rf1ok && ok2tx) {
+							if (trace) LogInfo("Network 1 Matched PassAll %d & rf1ok %s",selnet,rf1ok  ? "yes" : "no");
 							if (m_status[slotNo] == DMRGWS_NONE || m_status[slotNo] == DMRGWS_DMRNETWORK1) {
 								rewrite(m_dmr1SrcRewrites, data, trace);
 								m_dmrNetwork1->write(data);
@@ -793,7 +822,7 @@ int CDMRGateway::run()
 					}
 				}
 
-				if (result == RESULT_UNMATCHED && net2ok) {
+				if (result == RESULT_UNMATCHED && rf1ok) {
 					if (m_dmrNetwork2 != NULL) {
 
 						for (std::vector<CRewrite*>::iterator it = m_dmr2Passalls.begin(); it != m_dmr2Passalls.end(); ++it) {
@@ -804,8 +833,8 @@ int CDMRGateway::run()
 							}
 						}
 
-						if (result == RESULT_MATCHED && net2ok && ok2tx) {
-							if (trace) LogInfo("Network 2 Matched PassAll %d & Net2OK %s",selnet,net2ok  ? "yes" : "no");
+						if (result == RESULT_MATCHED && rf1ok && ok2tx) {
+							if (trace) LogInfo("Network 2 Matched PassAll %d & rf1ok %s",selnet,rf1ok  ? "yes" : "no");
 
 							if (m_status[slotNo] == DMRGWS_NONE || m_status[slotNo] == DMRGWS_DMRNETWORK2) {
 								rewrite(m_dmr2SrcRewrites, data, trace);
@@ -819,7 +848,7 @@ int CDMRGateway::run()
 					}
 				}
 
-				if (result == RESULT_UNMATCHED && net3ok) {
+				if (result == RESULT_UNMATCHED && rf3ok) {
 					if (m_dmrNetwork3 != NULL) {
 
 						for (std::vector<CRewrite*>::iterator it = m_dmr3Passalls.begin(); it != m_dmr3Passalls.end(); ++it) {
@@ -830,8 +859,8 @@ int CDMRGateway::run()
 							}
 						}
 
-						if (result == RESULT_MATCHED && net3ok && ok2tx) {
-							if (trace) LogInfo("Network 3 Matched PassAll %d & Net3OK %s",selnet,net3ok  ? "yes" : "no");
+						if (result == RESULT_MATCHED && rf3ok && ok2tx) {
+							if (trace) LogInfo("Network 3 Matched PassAll %d & rf3ok %s",selnet,rf3ok  ? "yes" : "no");
 
 							if (m_status[slotNo] == DMRGWS_NONE || m_status[slotNo] == DMRGWS_DMRNETWORK3) {
 								rewrite(m_dmr3SrcRewrites, data, trace);
@@ -845,7 +874,7 @@ int CDMRGateway::run()
 					}
 				}
 
-				if (result == RESULT_UNMATCHED && net4ok) {
+				if (result == RESULT_UNMATCHED && rf4ok) {
 					if (m_dmrNetwork4 != NULL) {
 
 						for (std::vector<CRewrite*>::iterator it = m_dmr4Passalls.begin(); it != m_dmr4Passalls.end(); ++it) {
@@ -856,8 +885,8 @@ int CDMRGateway::run()
 							}
 						}
 
-						if (result == RESULT_MATCHED && net4ok && ok2tx) {
-							if (trace) LogInfo("Network 4 Matched PassAll %d & Net4OK %s",selnet,net4ok  ? "yes" : "no");
+						if (result == RESULT_MATCHED && rf4ok && ok2tx) {
+							if (trace) LogInfo("Network 4 Matched PassAll %d & rf4ok %s",selnet,rf4ok  ? "yes" : "no");
 
 							if (m_status[slotNo] == DMRGWS_NONE || m_status[slotNo] == DMRGWS_DMRNETWORK4) {
 								rewrite(m_dmr4SrcRewrites, data, trace);
@@ -872,7 +901,7 @@ int CDMRGateway::run()
 					}
 				}
 
-				if (result == RESULT_UNMATCHED && net5ok) {
+				if (result == RESULT_UNMATCHED && rf5ok) {
 					if (m_dmrNetwork5 != NULL) {
 
 						for (std::vector<CRewrite*>::iterator it = m_dmr5Passalls.begin(); it != m_dmr5Passalls.end(); ++it) {
@@ -883,8 +912,8 @@ int CDMRGateway::run()
 							}
 						}
 
-						if (result == RESULT_MATCHED && net5ok && ok2tx) {
-							if (trace) LogInfo("Network 5 Matched PassAll %d & Net5OK %s",selnet,net5ok  ? "yes" : "no");
+						if (result == RESULT_MATCHED && rf5ok && ok2tx) {
+							if (trace) LogInfo("Network 5 Matched PassAll %d & rf5ok %s",selnet,rf5ok  ? "yes" : "no");
 
 							if (m_status[slotNo] == DMRGWS_NONE || m_status[slotNo] == DMRGWS_DMRNETWORK5) {
 								rewrite(m_dmr5SrcRewrites, data, trace);
@@ -898,9 +927,9 @@ int CDMRGateway::run()
 					}
 				}
 
-				if (result == RESULT_UNMATCHED && net6ok) {
+				if (result == RESULT_UNMATCHED && rf6ok) {
 					if (m_dmrNetwork6 != NULL) {
-						if (net6ok == false) LogInfo("Net6OK = False");
+						if (rf6ok == false) LogInfo("rf6ok = False");
 						for (std::vector<CRewrite*>::iterator it = m_dmr6Passalls.begin(); it != m_dmr6Passalls.end(); ++it) {
 							PROCESS_RESULT res = (*it)->process(data, trace);
 							if (res != RESULT_UNMATCHED) {
@@ -909,8 +938,8 @@ int CDMRGateway::run()
 							}
 						}
 
-						if (result == RESULT_MATCHED && net6ok && ok2tx) {
-							if (trace) LogInfo("Network 6 Matched PassAll %d & Net6OK %s",selnet,net6ok  ? "yes" : "no");
+						if (result == RESULT_MATCHED && rf6ok && ok2tx) {
+							if (trace) LogInfo("Network 6 Matched PassAll %d & rf6ok %s",selnet,rf6ok  ? "yes" : "no");
 
 							if (m_status[slotNo] == DMRGWS_NONE || m_status[slotNo] == DMRGWS_DMRNETWORK6) {
 								rewrite(m_dmr6SrcRewrites, data, trace);
