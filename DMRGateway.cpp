@@ -79,6 +79,7 @@ static bool rf6ok = false;
 static bool ok2tx = false;
 static int  locknet = 0;
 
+void ClearRFNets();
 void ClearNetworks();
 
 #if !defined(_WIN32) && !defined(_WIN64)
@@ -425,6 +426,7 @@ int CDMRGateway::run()
         LogInfo("Network %d Selected for StartUp",selnet);
 
 	ClearNetworks();
+	ClearRFNets();
 
         switch(selnet) {
         case 1 : net1ok = true;
@@ -576,6 +578,7 @@ int CDMRGateway::run()
 				
 				if ( dstId >= 9001 && dstId <= 9009){
 						ClearNetworks();
+						ClearRFNets();
 						storedtg = dstId;
                                 		if ( trace && ok2tx ) LogInfo("TESTAA Network keyed: %d", dstId);
                                 		selnet = dstId-9000;
@@ -588,7 +591,7 @@ int CDMRGateway::run()
                         	}
 
                        		if ( dstId > 9999999 ) {					
-					ClearNetworks();
+					ClearRFNets();
                                 	if ( trace ) LogInfo("Radio TG Keyed = %d",dstId);
                                 	selnet = (( dstId / 1000000 ) -10 );
                                 	if (trace ) LogInfo("Calculated Network = %d",selnet);
@@ -608,18 +611,43 @@ int CDMRGateway::run()
 
 
 				 	switch( selnet ) {
-        					case 1 : if ( m_dmrNetwork1 != NULL )  rf1ok=true;
-							break;
-        					case 2 : if ( m_dmrNetwork2 != NULL )  rf2ok=true;
-							break;
-        					case 3 : if ( m_dmrNetwork3 != NULL )  rf3ok=true;
-							break;
-        					case 4 : if ( m_dmrNetwork4 != NULL )  rf4ok=true;
-							break;
-        					case 5 : if ( m_dmrNetwork5 != NULL )  rf5ok=true;
-							break;
-        					case 6 : if ( m_dmrNetwork6 != NULL )  rf6ok=true;
-							break;
+        					case 1 : if ( m_dmrNetwork1 != NULL )
+							{
+								 rf1ok=true;
+								net1ok=true;
+								break;
+							}
+ 
+        					case 2 : if ( m_dmrNetwork2 != NULL ) 
+							{
+								 rf2ok=true;
+								net2ok=true;
+								break;
+							}
+        					case 3 : if ( m_dmrNetwork3 != NULL ) 
+							{
+								 rf3ok=true;
+								net3ok=true;
+								break;
+							}
+        					case 4 : if ( m_dmrNetwork4 != NULL )  
+        							{
+								 rf4ok=true;
+								net4ok=true;
+								break;
+							}
+						case 5 : if ( m_dmrNetwork5 != NULL )  
+							{
+								 rf5ok=true;
+								net5ok=true;
+								break;
+							}
+        					case 6 : if ( m_dmrNetwork6 != NULL )  
+							{
+								 rf6ok=true;
+								net6ok=true;
+								break;
+							}
 
 					}
 
@@ -2764,6 +2792,15 @@ void CDMRGateway::processDynamicTGControl()
 	}
 }
 void ClearNetworks()
+{
+net1ok=false;
+net2ok=false;
+net3ok=false;
+net4ok=false;
+net5ok=false;
+net6ok=false;
+}
+void ClearRFNets()
 {
 rf1ok=false;
 rf2ok=false;
