@@ -565,12 +565,6 @@ int CDMRGateway::run()
                                         ok2tx=false;
                                         selnet=0;
                                         locknet=0;
- //                                       if (m_dmrNetwork1 ) rf1ok = true;
- //                                       if (m_dmrNetwork2 ) rf2ok = true;
- //                                       if (m_dmrNetwork3 ) rf3ok = true;
- //                                       if (m_dmrNetwork4 ) rf4ok = true;
- //                                       if (m_dmrNetwork5 ) rf5ok = true;
- //                                       if (m_dmrNetwork6 ) rf6ok = true;
                                         if (m_dmrNetwork1 ) net1ok = true;
                                         if (m_dmrNetwork2 ) net2ok = true;
                                         if (m_dmrNetwork3 ) net3ok = true;
@@ -594,7 +588,7 @@ int CDMRGateway::run()
                         	}
 
                        		if ( dstId > 9999999 ) {					
-		//			ClearNetworks();
+					ClearNetworks();
                                 	if ( trace ) LogInfo("Radio TG Keyed = %d",dstId);
                                 	selnet = (( dstId / 1000000 ) -10 );
                                 	if (trace ) LogInfo("Calculated Network = %d",selnet);
@@ -2771,12 +2765,12 @@ void CDMRGateway::processDynamicTGControl()
 }
 void ClearNetworks()
 {
-net1ok=false;
-net2ok=false;
-net3ok=false;
-net4ok=false;
-net5ok=false;
-net6ok=false;
+rf1ok=false;
+rf2ok=false;
+rf3ok=false;
+rf4ok=false;
+rf5ok=false;
+rf6ok=false;
 }
 
 

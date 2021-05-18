@@ -17,7 +17,7 @@ echo "If this is a first time install of DMRGateway-4 then say Yes to the /etc/d
 echo "If this is an Update of DMRGateway-4 then say No"
 echo ""
 while true; do
-    read -p "Do you wish to update your /etc/dmrgateway file?" yn
+    read -p "Do you wish to update your /etc/dmrgateway file? y/n " yn
     case $yn in
         [Yy]* ) cp ./DMRGateway.ini /etc/dmrgateway ; break;;
         [Nn]* ) break ;;
