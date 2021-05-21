@@ -591,12 +591,14 @@ int CDMRGateway::run()
                         	}
 
                        		if ( dstId > 9999999 ) {					
+					ClearNetworks();
 					ClearRFNets();
                                 	if ( trace ) LogInfo("Radio TG Keyed = %d",dstId);
                                 	selnet = (( dstId / 1000000 ) -10 );
                                 	if (trace ) LogInfo("Calculated Network = %d",selnet);
                                 	LogDebug("Calculated TG = %d",dstId);
 					LogInfo("Selected 7x Network = %d",selnet);
+  					locknet = selnet;
 
 					}
 
