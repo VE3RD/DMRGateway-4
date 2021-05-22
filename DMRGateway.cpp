@@ -599,7 +599,7 @@ int CDMRGateway::run()
                                 	LogDebug("Calculated TG = %d",dstId);
 					LogInfo("Selected 7x Network = %d",selnet);
   					locknet = selnet;
-
+					ok2tx=true;
 					}
 
 				

@@ -8,7 +8,7 @@
 
 sudo mount -o remount,rw /
 
-echo -e '\e[1;44m'
+#echo -e '\e[1;44m'
 clear
 echo "Starting Binary Install"
 
@@ -19,8 +19,12 @@ echo ""
 while true; do
     read -p "Do you wish to update your /etc/dmrgateway file? y/n " yn
     case $yn in
-        [Yy]* ) cp ./DMRGateway.ini /etc/dmrgateway ; break;;
-        [Nn]* ) break ;;
+        [Yy]* ) cp ./DMRGateway.ini /etc/dmrgateway ; 
+		echo "Updating /etc/dmrgateway" ;
+		break;;
+        [Nn]* ) 
+		echo "NOT Updating /etc/dmrgateway" ;
+		break ;;
         * ) echo "Please answer yes or no.";;
     esac
 done
@@ -33,7 +37,6 @@ sleep 2
 sudo mmdvmhost.service restart
 sed -i '/use_colors = /c\use_colors = OFF' ~/.dialogrc
 
-echo -e '\e[\033[40m'
+#echo -e '\e[\033[40m'
 
-clear
 
