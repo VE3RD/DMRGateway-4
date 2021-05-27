@@ -35,7 +35,7 @@ sudo cp ./DMRGateway /usr/local/bin/
 sudo dmrgateway.service start
 sleep 2
 sudo mmdvmhost.service restart
-sed -i '/use_colors = /c\use_colors = OFF' ~/.dialogrc
+#sed -i '/use_colors = /c\use_colors = OFF' ~/.dialogrc
 
 #echo -e '\e[\033[40m'
 
