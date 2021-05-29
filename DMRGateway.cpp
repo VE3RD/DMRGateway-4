@@ -560,7 +560,7 @@ int CDMRGateway::run()
 
 				PROCESS_RESULT result = RESULT_UNMATCHED;
 				
-				ok2tx=false;
+				ok2tx=true;
 
                                 if ( dstId == 9000 ) {
                                         storedtg = dstId;
@@ -586,15 +586,14 @@ int CDMRGateway::run()
   						locknet = selnet;
 						if ( trace && ok2tx ) LogInfo("Network Locked = %d",selnet);
 						ok2tx=false;
-				} else {
-					ok2tx=true;
                         	}
 
                        		if ( dstId > 9999999 ) {					
 					ClearNetworks();
 					ClearRFNets();
                                 	if ( trace ) LogInfo("Radio TG Keyed = %d",dstId);
-                                	selnet = (( dstId / 1000000 ) -10 );
+                                	selnet = ( dstId / 1000000 );
+                                	selnet = selnet - 10;
                                 	if (trace ) LogInfo("Calculated Network = %d",selnet);
                                 	LogDebug("Calculated TG = %d",dstId);
 					LogInfo("Selected 7x Network = %d",selnet);
