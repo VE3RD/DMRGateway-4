@@ -29,7 +29,7 @@ while true; do
     esac
 done
 
-sudo sed -i '/^\[/h;G;/DMR Network/s/\(Type=\).*/\1Direct/m;P;d'  /etc/mmdvmhost 
+#sudo sed -i '/^\[/h;G;/DMR Network/s/\(Type=\).*/\1Direct/m;P;d'  /etc/mmdvmhost 
 
 sudo dmrgateway.service stop
 sudo cp ./DMRGateway /usr/local/bin/

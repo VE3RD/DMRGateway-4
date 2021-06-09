@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2015-2020 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2016-2020 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
  *
  *   You should have received a copy of the GNU General Public License
  *   along with this program; if not, write to the Free Software
- *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   Foundation, Inc., 676 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 #include "Conf.h"
@@ -24,7 +24,7 @@
 #include <cstring>
 #include <cctype>
 
-const int BUFFER_SIZE = 500;
+const int BUFFER_SIZE = 600;
 
 enum SECTION {
 	SECTION_NONE,
@@ -39,7 +39,10 @@ enum SECTION {
 	SECTION_DMR_NETWORK_5,
 	SECTION_DMR_NETWORK_6,
 	SECTION_XLX_NETWORK,
-	SECTION_DYNAMIC_TG_CONTROL
+	SECTION_GPSD,
+	SECTION_APRS,
+	SECTION_DYNAMIC_TG_CONTROL,
+	SECTION_REMOTE_CONTROL
 };
 
 CConf::CConf(const std::string& file) :
@@ -47,8 +50,6 @@ m_file(file),
 m_daemon(false),
 m_rptAddress("127.0.0.1"),
 m_rptPort(62032U),
-m_startNet(6U),
-m_NetMode(6U),
 m_localAddress("127.0.0.1"),
 m_localPort(62031U),
 m_rfTimeout(10U),
@@ -62,10 +63,7 @@ m_logDisplayLevel(0U),
 m_logFileLevel(0U),
 m_logFilePath(),
 m_logFileRoot(),
-m_infoEnabled(false),
-m_infoRXFrequency(0U),
-m_infoTXFrequency(0U),
-m_infoPower(0U),
+m_logFileRotate(true),
 m_infoLatitude(0.0F),
 m_infoLongitude(0.0F),
 m_infoHeight(0),
@@ -195,8 +193,19 @@ m_xlxNetworkRelink(0U),
 m_xlxNetworkDebug(false),
 m_xlxNetworkUserControl(true),
 m_xlxNetworkModule(),
+m_gpsdEnabled(false),
+m_gpsdAddress(),
+m_gpsdPort(),
+m_aprsEnabled(false),
+m_aprsAddress(),
+m_aprsPort(0U),
+m_aprsSuffix(),
+m_aprsDescription(),
 m_dynamicTGControlEnabled(false),
-m_dynamicTGControlPort(3769U)
+m_dynamicTGControlPort(3769U),
+m_remoteControlEnabled(false),
+m_remoteControlAddress("127.0.0.1"),
+m_remoteControlPort(0U)
 {
 }
 
@@ -242,27 +251,43 @@ bool CConf::read()
 			section = SECTION_DMR_NETWORK_5;
 		else if (::strncmp(buffer, "[DMR Network 6]", 15U) == 0)
 			section = SECTION_DMR_NETWORK_6;
+		else if (::strncmp(buffer, "[GPSD]", 6U) == 0)
+			section = SECTION_GPSD;
+		else if (::strncmp(buffer, "[APRS]", 6U) == 0)
+			section = SECTION_APRS;
 		else if (::strncmp(buffer, "[Dynamic TG Control]", 20U) == 0)
 			section = SECTION_DYNAMIC_TG_CONTROL;
+		else if (::strncmp(buffer, "[Remote Control]", 16U) == 0)
+			section = SECTION_REMOTE_CONTROL;
 		else
 			section = SECTION_NONE;
 
 		continue;
 	}
 
-    char* key = ::strtok(buffer, " \t=\r\n");
-    if (key == NULL)
-      continue;
+	char* key = ::strtok(buffer, " \t=\r\n");
+	if (key == NULL)
+		continue;
 
-    char* value = ::strtok(NULL, "\r\n");
-    if (value == NULL)
-      continue;
+	char* value = ::strtok(NULL, "\r\n");
+	if (value == NULL)
+		continue;
 
 	// Remove quotes from the value
 	size_t len = ::strlen(value);
 	if (len > 1U && *value == '"' && value[len - 1U] == '"') {
 		value[len - 1U] = '\0';
 		value++;
+	} else {
+		char *p;
+
+		// if value is not quoted, remove after # (to make comment)
+		if ((p = strchr(value, '#')) != NULL)
+			*p = '\0';
+
+		// remove trailing tab/space
+		for (p = value + strlen(value) - 1U; p >= value && (*p == '\t' || *p == ' '); p--)
+			*p = '\0';
 	}
 
 	if (section == SECTION_GENERAL) {
@@ -277,15 +302,11 @@ bool CConf::read()
 			else if (::strcmp(key, "RptAddress") == 0)
 				m_rptAddress = value;
 			else if (::strcmp(key, "RptPort") == 0)
-				m_rptPort = (unsigned int)::atoi(value);
-			else if (::strcmp(key, "StartNet") == 0)
-				m_startNet = (unsigned int)::atoi(value);
-			else if (::strcmp(key, "NetMode") == 0)
-				m_NetMode = (unsigned int)::atoi(value);
+				m_rptPort = (unsigned short)::atoi(value);
 			else if (::strcmp(key, "LocalAddress") == 0)
 				m_localAddress = value;
 			else if (::strcmp(key, "LocalPort") == 0)
-				m_localPort = (unsigned int)::atoi(value);
+				m_localPort = (unsigned short)::atoi(value);
 			else if (::strcmp(key, "RuleTrace") == 0)
 				m_ruleTrace = ::atoi(value) == 1;
 			else if (::strcmp(key, "Debug") == 0)
@@ -299,6 +320,8 @@ bool CConf::read()
 				m_logFileLevel = (unsigned int)::atoi(value);
 			else if (::strcmp(key, "DisplayLevel") == 0)
 				m_logDisplayLevel = (unsigned int)::atoi(value);
+			else if (::strcmp(key, "FileRotate") == 0)
+				m_logFileRotate = ::atoi(value) == 1;
 		} else if (section == SECTION_VOICE) {
 			if (::strcmp(key, "Enabled") == 0)
 				m_voiceEnabled = ::atoi(value) == 1;
@@ -307,15 +330,7 @@ bool CConf::read()
 			else if (::strcmp(key, "Directory") == 0)
 				m_voiceDirectory = value;
 		} else if (section == SECTION_INFO) {
-			if (::strcmp(key, "Enabled") == 0)
-				m_infoEnabled = ::atoi(value) == 1;
-			else if (::strcmp(key, "TXFrequency") == 0)
-				m_infoTXFrequency = (unsigned int)::atoi(value);
-			else if (::strcmp(key, "RXFrequency") == 0)
-				m_infoRXFrequency = (unsigned int)::atoi(value);
-			else if (::strcmp(key, "Power") == 0)
-				m_infoPower = (unsigned int)::atoi(value);
-			else if (::strcmp(key, "Latitude") == 0)
+			if (::strcmp(key, "Latitude") == 0)
 				m_infoLatitude = float(::atof(value));
 			else if (::strcmp(key, "Longitude") == 0)
 				m_infoLongitude = float(::atof(value));
@@ -334,14 +349,14 @@ bool CConf::read()
 				m_xlxNetworkId = (unsigned int)::atoi(value);
 			else if (::strcmp(key, "File") == 0)
 				m_xlxNetworkFile = value;
-            else if (::strcmp(key, "ReloadTime") == 0)
-                m_xlxNetworkReloadTime = (unsigned int)::atoi(value);
-            else if (::strcmp(key, "Port") == 0)
-                m_xlxNetworkPort = (unsigned int)::atoi(value);
-            else if (::strcmp(key, "Password") == 0)
-                m_xlxNetworkPassword = value;
-            else if (::strcmp(key, "Local") == 0)
-				m_xlxNetworkLocal = (unsigned int)::atoi(value);
+			else if (::strcmp(key, "ReloadTime") == 0)
+				m_xlxNetworkReloadTime = (unsigned int)::atoi(value);
+			else if (::strcmp(key, "Port") == 0)
+				m_xlxNetworkPort = (unsigned short)::atoi(value);
+			else if (::strcmp(key, "Password") == 0)
+				m_xlxNetworkPassword = value;
+			else if (::strcmp(key, "Local") == 0)
+				m_xlxNetworkLocal = (unsigned short)::atoi(value);
 			else if (::strcmp(key, "Slot") == 0)
 				m_xlxNetworkSlot = (unsigned int)::atoi(value);
 			else if (::strcmp(key, "TG") == 0)
@@ -368,9 +383,9 @@ bool CConf::read()
 			else if (::strcmp(key, "Address") == 0)
 				m_dmrNetwork1Address = value;
 			else if (::strcmp(key, "Port") == 0)
-				m_dmrNetwork1Port = (unsigned int)::atoi(value);
+				m_dmrNetwork1Port = (unsigned short)::atoi(value);
 			else if (::strcmp(key, "Local") == 0)
-				m_dmrNetwork1Local = (unsigned int)::atoi(value);
+				m_dmrNetwork1Local = (unsigned short)::atoi(value);
 			else if (::strcmp(key, "Password") == 0)
 				m_dmrNetwork1Password = value;
 			else if (::strcmp(key, "Options") == 0)
@@ -490,9 +505,9 @@ bool CConf::read()
 			else if (::strcmp(key, "Address") == 0)
 				m_dmrNetwork2Address = value;
 			else if (::strcmp(key, "Port") == 0)
-				m_dmrNetwork2Port = (unsigned int)::atoi(value);
+				m_dmrNetwork2Port = (unsigned short)::atoi(value);
 			else if (::strcmp(key, "Local") == 0)
-				m_dmrNetwork2Local = (unsigned int)::atoi(value);
+				m_dmrNetwork2Local = (unsigned short)::atoi(value);
 			else if (::strcmp(key, "Password") == 0)
 				m_dmrNetwork2Password = value;
 			else if (::strcmp(key, "Options") == 0)
@@ -612,9 +627,9 @@ bool CConf::read()
 			else if (::strcmp(key, "Address") == 0)
 				m_dmrNetwork3Address = value;
 			else if (::strcmp(key, "Port") == 0)
-				m_dmrNetwork3Port = (unsigned int)::atoi(value);
+				m_dmrNetwork3Port = (unsigned short)::atoi(value);
 			else if (::strcmp(key, "Local") == 0)
-				m_dmrNetwork3Local = (unsigned int)::atoi(value);
+				m_dmrNetwork3Local = (unsigned short)::atoi(value);
 			else if (::strcmp(key, "Password") == 0)
 				m_dmrNetwork3Password = value;
 			else if (::strcmp(key, "Options") == 0)
@@ -734,9 +749,9 @@ bool CConf::read()
 			else if (::strcmp(key, "Address") == 0)
 				m_dmrNetwork4Address = value;
 			else if (::strcmp(key, "Port") == 0)
-				m_dmrNetwork4Port = (unsigned int)::atoi(value);
+				m_dmrNetwork4Port = (unsigned short)::atoi(value);
 			else if (::strcmp(key, "Local") == 0)
-				m_dmrNetwork4Local = (unsigned int)::atoi(value);
+				m_dmrNetwork4Local = (unsigned short)::atoi(value);
 			else if (::strcmp(key, "Password") == 0)
 				m_dmrNetwork4Password = value;
 			else if (::strcmp(key, "Options") == 0)
@@ -846,7 +861,6 @@ bool CConf::read()
 				unsigned int slotNo = (unsigned int)::atoi(value);
 				m_dmrNetwork4PassAllTG.push_back(slotNo);
 			}
-/////////////////////
 		} else if (section == SECTION_DMR_NETWORK_5) {
 			if (::strcmp(key, "Enabled") == 0)
 				m_dmrNetwork5Enabled = ::atoi(value) == 1;
@@ -857,9 +871,9 @@ bool CConf::read()
 			else if (::strcmp(key, "Address") == 0)
 				m_dmrNetwork5Address = value;
 			else if (::strcmp(key, "Port") == 0)
-				m_dmrNetwork5Port = (unsigned int)::atoi(value);
+				m_dmrNetwork5Port = (unsigned short)::atoi(value);
 			else if (::strcmp(key, "Local") == 0)
-				m_dmrNetwork5Local = (unsigned int)::atoi(value);
+				m_dmrNetwork5Local = (unsigned short)::atoi(value);
 			else if (::strcmp(key, "Password") == 0)
 				m_dmrNetwork5Password = value;
 			else if (::strcmp(key, "Options") == 0)
@@ -969,7 +983,6 @@ bool CConf::read()
 				unsigned int slotNo = (unsigned int)::atoi(value);
 				m_dmrNetwork5PassAllTG.push_back(slotNo);
 			}
-/////////////////////
 		} else if (section == SECTION_DMR_NETWORK_6) {
 			if (::strcmp(key, "Enabled") == 0)
 				m_dmrNetwork6Enabled = ::atoi(value) == 1;
@@ -980,9 +993,9 @@ bool CConf::read()
 			else if (::strcmp(key, "Address") == 0)
 				m_dmrNetwork6Address = value;
 			else if (::strcmp(key, "Port") == 0)
-				m_dmrNetwork6Port = (unsigned int)::atoi(value);
+				m_dmrNetwork6Port = (unsigned short)::atoi(value);
 			else if (::strcmp(key, "Local") == 0)
-				m_dmrNetwork6Local = (unsigned int)::atoi(value);
+				m_dmrNetwork6Local = (unsigned short)::atoi(value);
 			else if (::strcmp(key, "Password") == 0)
 				m_dmrNetwork6Password = value;
 			else if (::strcmp(key, "Options") == 0)
@@ -1092,12 +1105,34 @@ bool CConf::read()
 				unsigned int slotNo = (unsigned int)::atoi(value);
 				m_dmrNetwork6PassAllTG.push_back(slotNo);
 			}
-//////////////////////////	
-	} else if (section == SECTION_DYNAMIC_TG_CONTROL) {
+		} else if (section == SECTION_GPSD) {
+			if (::strcmp(key, "Enable") == 0)
+				m_gpsdEnabled = ::atoi(value) == 1;
+			else if (::strcmp(key, "Address") == 0)
+				m_gpsdAddress = value;
+			else if (::strcmp(key, "Port") == 0)
+				m_gpsdPort = value;
+		} else if (section == SECTION_APRS) {
+			if (::strcmp(key, "Enable") == 0)
+				m_aprsEnabled = ::atoi(value) == 1;
+			else if (::strcmp(key, "Address") == 0)
+				m_aprsAddress = value;
+			else if (::strcmp(key, "Port") == 0)
+				m_aprsPort = (unsigned short)::atoi(value);
+			else if (::strcmp(key, "Suffix") == 0)
+				m_aprsSuffix = value;
+		} else if (section == SECTION_DYNAMIC_TG_CONTROL) {
 			if (::strcmp(key, "Enabled") == 0)
 				m_dynamicTGControlEnabled = ::atoi(value) == 1;
 			else if (::strcmp(key, "Port") == 0)
-				m_dynamicTGControlPort = (unsigned int)::atoi(value);
+				m_dynamicTGControlPort = (unsigned short)::atoi(value);
+		} else if (section == SECTION_REMOTE_CONTROL) {
+			if (::strcmp(key, "Enable") == 0)
+				m_remoteControlEnabled = ::atoi(value) == 1;
+			else if (::strcmp(key, "Address") == 0)
+				m_remoteControlAddress = value;
+			else if (::strcmp(key, "Port") == 0)
+				m_remoteControlPort = (unsigned short)::atoi(value);
 		}
 	}
 
@@ -1116,19 +1151,9 @@ std::string CConf::getRptAddress() const
 	return m_rptAddress;
 }
 
-unsigned int CConf::getRptPort() const
+unsigned short CConf::getRptPort() const
 {
 	return m_rptPort;
-}
-
-unsigned int CConf::getStartNet() const
-{
-	return m_startNet;
-}
-
-unsigned int CConf::getNetMode() const
-{
-	return m_NetMode;
 }
 
 std::string CConf::getLocalAddress() const
@@ -1136,7 +1161,7 @@ std::string CConf::getLocalAddress() const
 	return m_localAddress;
 }
 
-unsigned int CConf::getLocalPort() const
+unsigned short CConf::getLocalPort() const
 {
 	return m_localPort;
 }
@@ -1181,6 +1206,11 @@ std::string CConf::getLogFileRoot() const
 	return m_logFileRoot;
 }
 
+bool CConf::getLogFileRotate() const
+{
+	return m_logFileRotate;
+}
+
 bool CConf::getVoiceEnabled() const
 {
 	return m_voiceEnabled;
@@ -1194,26 +1224,6 @@ std::string CConf::getVoiceLanguage() const
 std::string CConf::getVoiceDirectory() const
 {
 	return m_voiceDirectory;
-}
-
-bool CConf::getInfoEnabled() const
-{
-	return m_infoEnabled;
-}
-
-unsigned int CConf::getInfoRXFrequency() const
-{
-	return m_infoRXFrequency;
-}
-
-unsigned int CConf::getInfoTXFrequency() const
-{
-	return m_infoTXFrequency;
-}
-
-unsigned int CConf::getInfoPower() const
-{
-	return m_infoPower;
 }
 
 float CConf::getInfoLatitude() const
@@ -1266,7 +1276,7 @@ unsigned int CConf::getXLXNetworkReloadTime() const
     return m_xlxNetworkReloadTime;
 }
 
-unsigned int CConf::getXLXNetworkPort() const
+unsigned short CConf::getXLXNetworkPort() const
 {
     return m_xlxNetworkPort;
 }
@@ -1276,7 +1286,7 @@ std::string CConf::getXLXNetworkPassword() const
     return m_xlxNetworkPassword;
 }
 
-unsigned int CConf::getXLXNetworkLocal() const
+unsigned short CConf::getXLXNetworkLocal() const
 {
 	return m_xlxNetworkLocal;
 }
@@ -1342,12 +1352,12 @@ std::string CConf::getDMRNetwork1Address() const
 	return m_dmrNetwork1Address;
 }
 
-unsigned int CConf::getDMRNetwork1Port() const
+unsigned short CConf::getDMRNetwork1Port() const
 {
 	return m_dmrNetwork1Port;
 }
 
-unsigned int CConf::getDMRNetwork1Local() const
+unsigned short CConf::getDMRNetwork1Local() const
 {
 	return m_dmrNetwork1Local;
 }
@@ -1435,12 +1445,12 @@ std::string CConf::getDMRNetwork2Address() const
 	return m_dmrNetwork2Address;
 }
 
-unsigned int CConf::getDMRNetwork2Port() const
+unsigned short CConf::getDMRNetwork2Port() const
 {
 	return m_dmrNetwork2Port;
 }
 
-unsigned int CConf::getDMRNetwork2Local() const
+unsigned short CConf::getDMRNetwork2Local() const
 {
 	return m_dmrNetwork2Local;
 }
@@ -1528,12 +1538,12 @@ std::string CConf::getDMRNetwork3Address() const
 	return m_dmrNetwork3Address;
 }
 
-unsigned int CConf::getDMRNetwork3Port() const
+unsigned short CConf::getDMRNetwork3Port() const
 {
 	return m_dmrNetwork3Port;
 }
 
-unsigned int CConf::getDMRNetwork3Local() const
+unsigned short CConf::getDMRNetwork3Local() const
 {
 	return m_dmrNetwork3Local;
 }
@@ -1621,12 +1631,12 @@ std::string CConf::getDMRNetwork4Address() const
 	return m_dmrNetwork4Address;
 }
 
-unsigned int CConf::getDMRNetwork4Port() const
+unsigned short CConf::getDMRNetwork4Port() const
 {
 	return m_dmrNetwork4Port;
 }
 
-unsigned int CConf::getDMRNetwork4Local() const
+unsigned short CConf::getDMRNetwork4Local() const
 {
 	return m_dmrNetwork4Local;
 }
@@ -1690,7 +1700,7 @@ std::vector<unsigned int> CConf::getDMRNetwork4PassAllTG() const
 {
 	return m_dmrNetwork4PassAllTG;
 }
-//////////////////
+
 bool CConf::getDMRNetwork5Enabled() const
 {
 	return m_dmrNetwork5Enabled;
@@ -1714,12 +1724,12 @@ std::string CConf::getDMRNetwork5Address() const
 	return m_dmrNetwork5Address;
 }
 
-unsigned int CConf::getDMRNetwork5Port() const
+unsigned short CConf::getDMRNetwork5Port() const
 {
 	return m_dmrNetwork5Port;
 }
 
-unsigned int CConf::getDMRNetwork5Local() const
+unsigned short CConf::getDMRNetwork5Local() const
 {
 	return m_dmrNetwork5Local;
 }
@@ -1783,7 +1793,7 @@ std::vector<unsigned int> CConf::getDMRNetwork5PassAllTG() const
 {
 	return m_dmrNetwork5PassAllTG;
 }
-////////////////////////////
+
 bool CConf::getDMRNetwork6Enabled() const
 {
 	return m_dmrNetwork6Enabled;
@@ -1792,7 +1802,7 @@ bool CConf::getDMRNetwork6Enabled() const
 std::string CConf::getDMRNetwork6Name() const
 {
 	if (m_dmrNetwork6Name.empty())
-		return "DMR-6";
+		return "DMR-5";
 	else
 		return m_dmrNetwork6Name;
 }
@@ -1807,12 +1817,12 @@ std::string CConf::getDMRNetwork6Address() const
 	return m_dmrNetwork6Address;
 }
 
-unsigned int CConf::getDMRNetwork6Port() const
+unsigned short CConf::getDMRNetwork6Port() const
 {
 	return m_dmrNetwork6Port;
 }
 
-unsigned int CConf::getDMRNetwork6Local() const
+unsigned short CConf::getDMRNetwork6Local() const
 {
 	return m_dmrNetwork6Local;
 }
@@ -1877,13 +1887,67 @@ std::vector<unsigned int> CConf::getDMRNetwork6PassAllTG() const
 	return m_dmrNetwork6PassAllTG;
 }
 
-////////////////////////////
+bool CConf::getGPSDEnabled() const
+{
+	return m_gpsdEnabled;
+}
+
+std::string CConf::getGPSDAddress() const
+{
+	return m_gpsdAddress;
+}
+
+std::string CConf::getGPSDPort() const
+{
+	return m_gpsdPort;
+}
+
+bool CConf::getAPRSEnabled() const
+{
+	return m_aprsEnabled;
+}
+
+std::string CConf::getAPRSAddress() const
+{
+	return m_aprsAddress;
+}
+
+unsigned short CConf::getAPRSPort() const
+{
+	return m_aprsPort;
+}
+
+std::string CConf::getAPRSSuffix() const
+{
+	return m_aprsSuffix;
+}
+
+std::string CConf::getAPRSDescription() const
+{
+	return m_aprsDescription;
+}
+
 bool CConf::getDynamicTGControlEnabled() const
 {
 	return m_dynamicTGControlEnabled;
 }
 
-unsigned int CConf::getDynamicTGControlPort() const
+unsigned short CConf::getDynamicTGControlPort() const
 {
 	return m_dynamicTGControlPort;
+}
+
+bool CConf::getRemoteControlEnabled() const
+{
+	return m_remoteControlEnabled;
+}
+
+std::string CConf::getRemoteControlAddress() const
+{
+	return m_remoteControlAddress;
+}
+
+unsigned short CConf::getRemoteControlPort() const
+{
+	return m_remoteControlPort;
 }

@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2015-2021 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2018,2020 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,9 +16,46 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#if !defined(VERSION_H)
-#define	VERSION_H
+#ifndef	GPSD_H
+#define	GPSD_H
 
-const char* VERSION = "20210409";
+#if defined(USE_GPSD)
+
+#include "APRSWriter.h"
+#include "DMRNetwork.h"
+#include "Timer.h"
+
+#include <string>
+#include <vector>
+
+#include <gps.h>
+
+class CGPSD {
+public:
+	CGPSD(const std::string& address, const std::string& port);
+	~CGPSD();
+
+	void addNetwork(CDMRNetwork* network);
+
+	void setAPRS(CAPRSWriter* aprs);
+
+	bool open();
+
+	void clock(unsigned int ms);
+
+	void close();
+
+private:
+	std::string               m_gpsdAddress;
+	std::string               m_gpsdPort;
+	struct gps_data_t         m_gpsdData;
+	CTimer                    m_idTimer;
+	std::vector<CDMRNetwork*> m_networks;
+	CAPRSWriter*              m_aprs;
+
+	void sendReport();
+};
+
+#endif
 
 #endif

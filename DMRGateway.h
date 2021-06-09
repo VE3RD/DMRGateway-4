@@ -19,18 +19,21 @@
 #if !defined(DMRGateway_H)
 #define	DMRGateway_H
 
-#include "RepeaterProtocol.h"
+#include "RemoteControl.h"
 #include "RewriteDynTGNet.h"
 #include "RewriteDynTGRF.h"
 #include "MMDVMNetwork.h"
 #include "DMRNetwork.h"
+#include "APRSWriter.h"
 #include "Reflectors.h"
+#include "XLXVoice.h"
 #include "UDPSocket.h"
 #include "RewriteTG.h"
 #include "DynVoice.h"
 #include "Rewrite.h"
 #include "Timer.h"
 #include "Conf.h"
+#include "GPSD.h"
 
 #include <string>
 
@@ -53,10 +56,12 @@ public:
 
 	int run();
 
+	void buildNetworkStatusString(std::string &str);
+
 private:
 	CConf              m_conf;
 	DMRGW_STATUS*      m_status;
-	IRepeaterProtocol* m_repeater;
+	CMMDVMNetwork*     m_repeater;
 	unsigned char*     m_config;
 	unsigned int       m_configLen;
 	CDMRNetwork*       m_dmrNetwork1;
@@ -79,18 +84,19 @@ private:
 	unsigned int       m_xlxSlot;
 	unsigned int       m_xlxTG;
 	unsigned int       m_xlxBase;
-	unsigned int       m_xlxLocal;
-    unsigned int       m_xlxPort;
-    std::string        m_xlxPassword;
+	unsigned short     m_xlxLocal;
+	unsigned short     m_xlxPort;
+	std::string        m_xlxPassword;
 	unsigned int       m_xlxStartup;
 	unsigned int       m_xlxRoom;
 	CTimer 	           m_xlxRelink;
 	bool               m_xlxConnected;
 	bool               m_xlxDebug;
-    bool               m_xlxUserControl;
-    char               m_xlxModule;
+	bool               m_xlxUserControl;
+	char               m_xlxModule;
 	CRewriteTG*        m_rptRewrite;
 	CRewriteTG*        m_xlxRewrite;
+	CXLXVoice*         m_xlxVoice;
 	std::vector<CRewrite*> m_dmr1NetRewrites;
 	std::vector<CRewrite*> m_dmr1RFRewrites;
 	std::vector<CRewrite*> m_dmr1SrcRewrites;
@@ -118,7 +124,22 @@ private:
 	std::vector<CDynVoice*> m_dynVoices;
 	std::vector<CRewriteDynTGRF*> m_dynRF;
 	CUDPSocket*            m_socket;
-
+	CAPRSWriter*           m_writer;
+	std::string            m_callsign;
+	unsigned int           m_txFrequency;
+	unsigned int           m_rxFrequency;
+#if defined(USE_GPSD)
+	CGPSD*                 m_gpsd;
+#endif
+	bool                   m_network1Enabled;
+	bool                   m_network2Enabled;
+	bool                   m_network3Enabled;
+	bool                   m_network4Enabled;
+	bool                   m_network5Enabled;
+	bool                   m_network6Enabled;
+	bool                   m_networkXlxEnabled;
+	CRemoteControl*        m_remoteControl;
+	
 	bool createMMDVM();
 	bool createDMRNetwork1();
 	bool createDMRNetwork2();
@@ -139,8 +160,11 @@ private:
 
 	void processRadioPosition();
 	void processTalkerAlias();
-	void processHomePosition();
+	void createAPRS();
 	void processDynamicTGControl();
+	void remoteControl();
+	void processEnableCommand(CDMRNetwork* network, const std::string& name, bool& mode, bool enabled);
+	void buildNetworkStatusNetworkString(std::string &str, const std::string& name, CDMRNetwork* network, bool enabled);
 };
 
 #endif

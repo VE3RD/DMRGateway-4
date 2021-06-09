@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2015,2016,2017,2018 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2015,2016,2017,2018,2020,2021 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -31,15 +31,16 @@ const unsigned int BUFFER_LENGTH = 500U;
 const unsigned int HOMEBREW_DATA_PACKET_LENGTH = 55U;
 
 
-CDMRNetwork::CDMRNetwork(const std::string& address, unsigned int port, unsigned int local, unsigned int id, const std::string& password, const std::string& name, const char* version, bool debug) :
-m_address(),
-m_port(port),
+CDMRNetwork::CDMRNetwork(const std::string& address, unsigned short port, unsigned short local, unsigned int id, const std::string& password, const std::string& name, bool location, bool debug) :
+m_addr(),
+m_addrLen(0U),
 m_id(NULL),
 m_password(password),
 m_name(name),
-m_version(version),
+m_location(location),
 m_debug(debug),
 m_socket(local),
+m_enabled(false),
 m_status(WAITING_CONNECT),
 m_retryTimer(1000U, 10U),
 m_timeoutTimer(1000U, 60U),
@@ -55,9 +56,9 @@ m_beacon(false)
 	assert(port > 0U);
 	assert(id > 1000U);
 	assert(!password.empty());
-	assert(version != NULL);
 
-	m_address = CUDPSocket::lookup(address);
+	if (CUDPSocket::lookup(address, port, m_addr, m_addrLen) != 0)
+		m_addrLen = 0U;
 
 	m_buffer   = new unsigned char[BUFFER_LENGTH];
 	m_salt     = new unsigned char[sizeof(uint32_t)];
@@ -94,6 +95,11 @@ void CDMRNetwork::setConfig(const unsigned char* data, unsigned int len)
 
 bool CDMRNetwork::open()
 {
+	if (m_addrLen == 0U) {
+		LogError("%s, Could not lookup the address of the master", m_name.c_str());
+		return false;
+	}
+
 	LogMessage("%s, Opening DMR Network", m_name.c_str());
 
 	m_status = WAITING_CONNECT;
@@ -101,6 +107,14 @@ bool CDMRNetwork::open()
 	m_retryTimer.start();
 
 	return true;
+}
+
+void CDMRNetwork::enable(bool enabled)
+{
+        if (!enabled && m_enabled)
+                m_rxData.clear();
+
+        m_enabled = enabled;
 }
 
 bool CDMRNetwork::read(CDMRData& data)
@@ -220,9 +234,6 @@ bool CDMRNetwork::write(const CDMRData& data)
 
 	buffer[54U] = data.getRSSI();
 
-	if (m_debug)
-		CUtils::dump(1U, "Network Transmitted", buffer, HOMEBREW_DATA_PACKET_LENGTH);
-
 	write(buffer, HOMEBREW_DATA_PACKET_LENGTH);
 
 	return true;
@@ -233,13 +244,16 @@ bool CDMRNetwork::writeRadioPosition(const unsigned char* data, unsigned int len
 	if (m_status != RUNNING)
 		return false;
 
+	if (!m_location)
+		return false;
+
 	unsigned char buffer[50U];
 
 	::memcpy(buffer + 0U, "DMRG", 4U);
 
 	::memcpy(buffer + 4U, m_id, 4U);
 
-	::memcpy(buffer + 8U, data + 8U, length - 8U);
+	::memcpy(buffer + 8U, data + 4U, length - 4U);
 
 	return write(buffer, length);
 }
@@ -255,25 +269,28 @@ bool CDMRNetwork::writeTalkerAlias(const unsigned char* data, unsigned int lengt
 
 	::memcpy(buffer + 4U, m_id, 4U);
 
-	::memcpy(buffer + 8U, data + 8U, length - 8U);
+	::memcpy(buffer + 8U, data + 4U, length - 4U);
 
 	return write(buffer, length);
 }
 
-bool CDMRNetwork::writeHomePosition(const unsigned char* data, unsigned int length)
+bool CDMRNetwork::writeHomePosition(float latitude, float longitude)
 {
 	if (m_status != RUNNING)
 		return false;
 
-	unsigned char buffer[50U];
+	if (!m_location)
+		return false;
+
+	char buffer[50U];
 
 	::memcpy(buffer + 0U, "RPTG", 4U);
 
 	::memcpy(buffer + 4U, m_id, 4U);
 
-	::memcpy(buffer + 8U, data + 8U, length - 8U);
+	::sprintf(buffer + 8U, "%+08.4f%+09.4f", latitude, longitude);
 
-	return write(buffer, length);
+	return write((unsigned char*)buffer, 25U);
 }
 
 bool CDMRNetwork::isConnected() const
@@ -281,11 +298,11 @@ bool CDMRNetwork::isConnected() const
 	return m_status == RUNNING;
 }
 
-void CDMRNetwork::close()
+void CDMRNetwork::close(bool sayGoodbye)
 {
 	LogMessage("%s, Closing DMR Network", m_name.c_str());
 
-	if (m_status == RUNNING) {
+	if (sayGoodbye && (m_status == RUNNING)) {
 		unsigned char buffer[9U];
 		::memcpy(buffer + 0U, "RPTCL", 5U);
 		::memcpy(buffer + 5U, m_id, 4U);
@@ -303,7 +320,7 @@ void CDMRNetwork::clock(unsigned int ms)
 	if (m_status == WAITING_CONNECT) {
 		m_retryTimer.clock(ms);
 		if (m_retryTimer.isRunning() && m_retryTimer.hasExpired()) {
-			bool ret = m_socket.open();
+			bool ret = m_socket.open(m_addr);
 			if (ret) {
 				ret = writeLogin();
 				if (!ret)
@@ -319,27 +336,29 @@ void CDMRNetwork::clock(unsigned int ms)
 		return;
 	}
 
-	in_addr address;
-	unsigned int port;
-	int length = m_socket.read(m_buffer, BUFFER_LENGTH, address, port);
+	sockaddr_storage address;
+	unsigned int addrlen;
+	int length = m_socket.read(m_buffer, BUFFER_LENGTH, address, addrlen);
 	if (length < 0) {
 		LogError("%s, Socket has failed, retrying connection to the master", m_name.c_str());
-		close();
+		close(false);
 		open();
 		return;
 	}
 
-	// if (m_debug && length > 0)
-	//	CUtils::dump(1U, "Network Received", m_buffer, length);
+	if (m_debug && length > 0)
+		CUtils::dump(1U, "Network Received", m_buffer, length);
 
-	if (length > 0 && m_address.s_addr == address.s_addr && m_port == port) {
+	if (length > 0 && CUDPSocket::match(m_addr, address)) {
 		if (::memcmp(m_buffer, "DMRD", 4U) == 0) {
 			if (m_debug)
 				CUtils::dump(1U, "Network Received", m_buffer, length);
 
-			unsigned char len = length;
-			m_rxData.addData(&len, 1U);
-			m_rxData.addData(m_buffer, len);
+			if (m_enabled) {
+				unsigned char len = length;
+				m_rxData.addData(&len, 1U);
+				m_rxData.addData(m_buffer, len);
+			}
 		} else if (::memcmp(m_buffer, "MSTNAK",  6U) == 0) {
 			if (m_status == RUNNING) {
 				LogWarning("%s, Login to the master has failed, retrying login ...", m_name.c_str());
@@ -351,7 +370,7 @@ void CDMRNetwork::clock(unsigned int ms)
 				   the Network sometimes times out and reaches here.
 				   We want it to reconnect so... */
 				LogError("%s, Login to the master has failed, retrying network ...", m_name.c_str());
-				close();
+				close(false);
 				open();
 				return;
 			}
@@ -395,7 +414,7 @@ void CDMRNetwork::clock(unsigned int ms)
 			}
 		} else if (::memcmp(m_buffer, "MSTCL",   5U) == 0) {
 			LogError("%s, Master is closing down", m_name.c_str());
-			close();
+			close(false);
 			open();
 		} else if (::memcmp(m_buffer, "MSTPONG", 7U) == 0) {
 			m_timeoutTimer.start();
@@ -436,7 +455,7 @@ void CDMRNetwork::clock(unsigned int ms)
 	m_timeoutTimer.clock(ms);
 	if (m_timeoutTimer.isRunning() && m_timeoutTimer.hasExpired()) {
 		LogError("%s, Connection to the master has timed out, retrying connection", m_name.c_str());
-		close();
+		close(false);
 		open();
 	}
 }
@@ -491,11 +510,8 @@ bool CDMRNetwork::writeConfig()
 	::memcpy(buffer + 4U, m_id, 4U);
 	::memcpy(buffer + 8U, m_configData, m_configLen);
 
-	char software[40U];
-	::sprintf(software, "DMRGateway-%s", m_version);
-
-	::memset(buffer + 222U, ' ', 40U);
-	::memcpy(buffer + 222U, software, ::strlen(software));
+	if (!m_location)
+		::memcpy(buffer + 38U, "0.00000000.000000", 17U);
 
 	return write((unsigned char*)buffer, m_configLen + 8U);
 }
@@ -524,13 +540,13 @@ bool CDMRNetwork::write(const unsigned char* data, unsigned int length)
 	assert(data != NULL);
 	assert(length > 0U);
 
-	// if (m_debug)
-	//	CUtils::dump(1U, "Network Transmitted", data, length);
+	if (m_debug)
+		CUtils::dump(1U, "Network Transmitted", data, length);
 
-	bool ret = m_socket.write(data, length, m_address, m_port);
+	bool ret = m_socket.write(data, length, m_addr, m_addrLen);
 	if (!ret) {
 		LogError("%s, Socket has failed when writing data to the master, retrying connection", m_name.c_str());
-		m_socket.close();
+		close(false);
 		open();
 		return false;
 	}

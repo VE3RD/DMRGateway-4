@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2015,2016,2017,2018 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2015,2016,2017,2018,2020.2021 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 class CDMRNetwork
 {
 public:
-	CDMRNetwork(const std::string& address, unsigned int port, unsigned int local, unsigned int id, const std::string& password, const std::string& name, const char* version, bool debug);
+	CDMRNetwork(const std::string& address, unsigned short port, unsigned short local, unsigned int id, const std::string& password, const std::string& name, bool location, bool debug);
 	~CDMRNetwork();
 
 	void setOptions(const std::string& options);
@@ -39,6 +39,8 @@ public:
 
 	bool open();
 
+	void enable(bool enabled);
+	
 	bool read(CDMRData& data);
 
 	bool write(const CDMRData& data);
@@ -47,7 +49,7 @@ public:
 
 	bool writeTalkerAlias(const unsigned char* data, unsigned int length);
 
-	bool writeHomePosition(const unsigned char* data, unsigned int length);
+	bool writeHomePosition(float latitude, float longitude);
 
 	bool wantsBeacon();
 
@@ -55,17 +57,18 @@ public:
 
 	bool isConnected() const;
 
-	void close();
+	void close(bool sayGoodbye);
 
-private: 
-	in_addr      m_address;
-	unsigned int m_port;
-	uint8_t*     m_id;
-	std::string  m_password;
-	std::string  m_name;
-	const char*  m_version;
-	bool         m_debug;
-	CUDPSocket   m_socket;
+private:
+	sockaddr_storage m_addr;
+	unsigned int     m_addrLen;
+	uint8_t*         m_id;
+	std::string      m_password;
+	std::string      m_name;
+	bool             m_location;
+	bool             m_debug;
+	CUDPSocket       m_socket;
+	bool             m_enabled;
 
 	enum STATUS {
 		WAITING_CONNECT,
