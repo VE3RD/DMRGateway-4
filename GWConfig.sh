@@ -40,15 +40,21 @@ homedir=/home/pi-star/DMRGateway-4/
 curdir=$(pwd)
 clear
 echo " "
-echo " If this is a fresh DMRGateway install - Select Item 1 to create and/or edit a  password file."
+echo " BASIC INSTRUCTIONS"
 echo " "
-echo " Item 2 will overwrite the /etc/dmrgateway file with a default vsersion"
-echo " and proceed with a limited configuration"
+echo " Item 1:	This will create and/or edit a password file. (Required for New a Install)"
 echo " "
-echo " Item 2 will Compile (If Required) and Install the Binary File"
+echo " Item 2: 	will overwrite the /etc/dmrgateway file with a default vsersion and"
+echo " 		will proceed with a limited configuration and"
+echo " 		will compile a new Binary if required and"
+echo "		will install the Binary DMRGateway File"
+echo " "
+echo " Item 3: 	will Ignore the existing Configuration File and"
+echo "        	will Compile a new Binary if Required and "
+echo "        	will Install the Binary File"
 echo " "
 #sleep 3
-read -n 1 -s -r -p "Press any key to continue"
+read -n 1 -s -r -p "Press any key to Continue"
 
 function GetSetInfo()
 {
