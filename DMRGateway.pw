@@ -1,18 +1,24 @@
 [DMR Network 1]
 PWD="A1BCDEFG"
+Enabled=0
 
 [DMR Network 2]
 PWD="P2ASSWORD2"
+Enabled=0
 
 [DMR Network 3]
 PWD="PASSWORD3"
+Enabled=0
 
 [DMR Network 4]
 PWD="NET4PWD"
+Enabled=0
 
 [DMR Network 5]
 PWD="NET5PWD"
+Enabled=0
 
 [DMR Network 6]
 PWD="NET6PWD"
+Enabled=0
 

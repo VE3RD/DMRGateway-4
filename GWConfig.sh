@@ -80,7 +80,6 @@ URL1="HTTP:\/\/www.qrz.com\/db\/$CALL"
 echo "URL $URL1"
 
  sudo sed -i '/^\[/h;G;/Info/s/\(URL=\).*/\1'"$URL1"'/m;P;d' /etc/dmrgateway
-#sed 's#http://www.find.com/page#http://www.replace.com/page#g' /etc/dmrgateway
 }
 
 function SetNetworks()
@@ -91,96 +90,86 @@ echo "Running SetNetworks"
 SRCRW="2,9990,2,$CALL,1"
 Id1="$ID""$HS""1"
  PWD=$(sed -nr "/^\[DMR Network 1\]/ { :l /^PWD[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $pwf)
+ ENAB=$(sed -nr "/^\[DMR Network 1\]/ { :l /^Enabled[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $pwf)
  sudo sed -i '/^\[/h;G;/DMR Network 1/s/\(URL=\).*/\1'"$Id"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 1/s/\(Password=\).*/\1'"$PWD"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 1/s/\(SRCRewrite=\).*/\1'"$SRCRW"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 1/s/\(Id=\).*/\1'"$Id1"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 1/s/\(Enabled=\).*/\1'"$ENAB"'/m;P;d' /etc/dmrgateway
  
 
 #[DMR Network 2]
 Id1="$ID""$HS""2"
  PWD=$(sed -nr "/^\[DMR Network 2\]/ { :l /^PWD[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $pwf)
+ ENAB=$(sed -nr "/^\[DMR Network 2\]/ { :l /^Enabled[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $pwf)
  sudo sed -i '/^\[/h;G;/DMR Network 2/s/\(URL=\).*/\1'"$Id"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 2/s/\(Password=\).*/\1'"$PWD"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 2/s/\(SRCRewrite=\).*/\1'"$SRCRW"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 2/s/\(Id=\).*/\1'"$Id1"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 2/s/\(Enabled=\).*/\1'"$ENAB"'/m;P;d' /etc/dmrgateway
 
 #[DMR Network 3]
 Id1="$ID""$HS""3"
  PWD=$(sed -nr "/^\[DMR Network 3\]/ { :l /^PWD[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $pwf)
+ ENAB=$(sed -nr "/^\[DMR Network 3\]/ { :l /^Enabled[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $pwf)
  sudo sed -i '/^\[/h;G;/DMR Network 3/s/\(URL=\).*/\1'"$Id"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 3/s/\(Password=\).*/\1'"$PWD"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 3/s/\(SRCRewrite=\).*/\1'"$SRCRW"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 3/s/\(Id=\).*/\1'"$Id1"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 3/s/\(Enabled=\).*/\1'"$ENAB"'/m;P;d' /etc/dmrgateway
 
 
 #[DMR Network 4]
 Id1="$ID""$HS""4"
  PWD=$(sed -nr "/^\[DMR Network 4\]/ { :l /^PWD[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $pwf)
+ ENAB=$(sed -nr "/^\[DMR Network 4\]/ { :l /^Enabled[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $pwf)
  sudo sed -i '/^\[/h;G;/DMR Network 4/s/\(URL=\).*/\1'"$Id"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 4/s/\(Password=\).*/\1'"$PWD"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 4/s/\(SRCRewrite=\).*/\1'"$SRCRW"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 4/s/\(Id=\).*/\1'"$Id1"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 4/s/\(Enabled=\).*/\1'"$ENAB"'/m;P;d' /etc/dmrgateway
 
 
 #[DMR Network 5]
 Id1="$ID""$HS""5"
  PWD=$(sed -nr "/^\[DMR Network 5\]/ { :l /^PWD[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $pwf)
+ ENAB=$(sed -nr "/^\[DMR Network 5\]/ { :l /^Enabled[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $pwf)
  sudo sed -i '/^\[/h;G;/DMR Network 5/s/\(URL=\).*/\1'"$Id"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 5/s/\(Password=\).*/\1'"$PWD"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 5/s/\(SRCRewrite=\).*/\1'"$SRCRW"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 5/s/\(Id=\).*/\1'"$Id1"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 5/s/\(Enabled=\).*/\1'"$ENAB"'/m;P;d' /etc/dmrgateway
 
 
 #[DMR Network 6]
 Id1="$ID""$HS""6"
  PWD=$(sed -nr "/^\[DMR Network 6\]/ { :l /^PWD[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $pwf)
+ ENAB=$(sed -nr "/^\[DMR Network 6\]/ { :l /^Enabled[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $pwf)
  sudo sed -i '/^\[/h;G;/DMR Network 6/s/\(URL=\).*/\1'"$Id"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 6/s/\(Password=\).*/\1'"$PWD"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 6/s/\(SRCRewrite=\).*/\1'"$SCRW"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 6/s/\(Id=\).*/\1'"$Id1"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 6/s/\(Enabled=\).*/\1'"$ENAB"'/m;P;d' /etc/dmrgateway
 
 
 }
-service_handle() {
-        # What do we want do to?
-        doWhat=${1}
-        systemctl ${doWhat} dmrgateway.timer > /dev/null 2>&1
-        systemctl ${doWhat} dmrgateway.service > /dev/null 2>&1
-        systemctl ${doWhat} mmdvmhost.service > /dev/null 2>&1 && sleep 2 > /dev/null 2>&1
-}
-
-
 function CopyBin()
 {
 echo "Running CopyBin"
 
 if [ ! -f /home/pi-star/DMRGateway-4/DMRGateway ]; then
 	sudo mount -o remount,rw /
-	echo "Stopping DMRGateway and MMDVMHost"
 	make clean
 	echo "Compiling DMRGateway Files"
 	make
-	service_handle stop
-	echo "Copying Binary file to /usr/local/bin/"
-	sudo cp /home/pi-star/DMRGateway-4/DMRGateway /usr/local/bin/
-	echo "Starting DMRGateway and MMDVMHost"
-	service_handle start
-
-else
+fi
 	sudo mount -o remount,rw /
 	echo "Stopping DMRGateway and MMDVMHost"
-	service_handle stop
-	echo "Copying Binary file to /usr/local/bin/"
-	sudo cp /home/pi-star/DMRGateway-4/DMRGateway /usr/local/bin/
-	echo "Starting DMRGateway and MMDVMHost"
-	service_handle start
-fi
+	sudo /home/pi-star/DMRGateway-4/binupdate.sh
 }
 
 function Menu
 {
-	echo "Stopping DMRGateway and MMDVMHost"
 HEIGHT=15
 WIDTH=60
 CHOICE_HEIGHT=7
@@ -220,7 +209,6 @@ case $CHOICE in
 		GetSetInfo
 		SetNetworks
 		CopyBin
-
             ;;
          3)
             echo "You Chose to Install DMRGateway - No Config File Update"		
@@ -239,7 +227,7 @@ fi
 Menu
 echo -e '\e[1;40m'
 
-dmrgateway.service restart ; mmdvmhost.service restart
+#dmrgateway.service restart ; mmdvmhost.service restart
 
 sleep 3
 #	sudo reboot

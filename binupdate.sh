@@ -9,28 +9,28 @@
 sudo mount -o remount,rw /
 
 #echo -e '\e[1;44m'
-clear
+#clear
 echo "Starting Binary Install"
 
-echo ""
-echo "If this is a first time install of DMRGateway-4 then say Yes to the /etc/dmrgateway file update"
-echo "If this is an Update of DMRGateway-4 then say No"
-echo ""
-while true; do
-    read -p "Do you wish to update your /etc/dmrgateway file? y/n " yn
-    case $yn in
-        [Yy]* ) cp ./DMRGateway.ini /etc/dmrgateway ; 
-		echo "Updating /etc/dmrgateway" ;
-		break;;
-        [Nn]* ) 
-		echo "NOT Updating /etc/dmrgateway" ;
-		break ;;
-        * ) echo "Please answer yes or no.";;
-    esac
-done
+#echo ""
+#echo "If this is a first time install of DMRGateway-4 then say Yes to the /etc/dmrgateway file update"
+#echo "If this is an Update of DMRGateway-4 then say No"
+#echo ""
+#while true; do
+#    read -p "Do you wish to update your /etc/dmrgateway file? y/n " yn
+#    case $yn in
+#        [Yy]* ) cp ./DMRGateway.ini /etc/dmrgateway ; 
+#		echo "Updating /etc/dmrgateway" ;
+#		break;;
+#        [Nn]* ) 
+#		echo "NOT Updating /etc/dmrgateway" ;
+#		break ;;
+#        * ) echo "Please answer yes or no.";;
+#    esac
+#done
 
 #sudo sed -i '/^\[/h;G;/DMR Network/s/\(Type=\).*/\1Gateway/m;P;d'  /etc/mmdvmhost 
-sudo sed -i "/Type=Dire/c\\Type=Gateway" /etc/mmdvmhost
+#sudo sed -i "/Type=Dire/c\\Type=Gateway" /etc/mmdvmhost
 
 sudo dmrgateway.service stop
 sudo cp ./DMRGateway /usr/local/bin/
