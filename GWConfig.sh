@@ -9,11 +9,14 @@ set -o errexit
 set -o pipefail
 sudo mount -o remount,rw /
 
-if [ "$1" ]; then
-  HS="$1"
-else
-  HS=9
+if [ ! "$1" ]; then
+	echo "Please Provisde  a HotSpot Number 0-9"
+	echo "Syntax:   ./GWConfig.sh 4   to configure hotspot number 4"
+	exit
 fi
+  
+HS="$1"
+
 ver="20200512"
 export NCURSES_NO_UTF8_ACS=1
 
@@ -44,8 +47,8 @@ echo " and proceed with a limited configuration"
 echo " "
 echo " Item 2 will Compile (If Required) and Install the Binary File"
 echo " "
-sleep 3
-
+#sleep 3
+read -n 1 -s -r -p "Press any key to continue"
 
 function GetSetInfo()
 {
