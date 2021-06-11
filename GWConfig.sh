@@ -188,7 +188,7 @@ BACKTITLE="This SCRIPT will Install the DMRGateway-4 by VE3RD"
 TITLE="Main Menu - DMRGateway Options"
 MENU="Select your Installation Mode"
 
-OPTIONS=(1 "Edit the DMRGateway Password File" 
+OPTIONS=(1 "Create/Edit the DMRGateway Password File" 
 	 2 "Install DMRGateway & Update /etc/dmrgateway"
          3 "Install DMRGateway NO Config File Update"
 	 4 "Quit")
@@ -209,6 +209,9 @@ echo -e '\e[1;44m'
 case $CHOICE in
         1)
             echo "Editing The DMRGateway Pasword File"		
+	    if [ !  -f /etc/dmrgwpass ]; then
+		cp /home/pi-star/DMRGateway-4/DMRGateway.pw /etc/dmrgwpass
+	   fi
 		nano /etc/dmrgwpass
 		Menu
             ;;
