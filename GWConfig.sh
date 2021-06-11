@@ -9,6 +9,11 @@ set -o errexit
 set -o pipefail
 sudo mount -o remount,rw /
 
+if [ "$1" ]; then
+  HS="$1"
+else
+  HS=9
+fi
 ver="20200512"
 export NCURSES_NO_UTF8_ACS=1
 
@@ -32,12 +37,12 @@ homedir=/home/pi-star/DMRGateway-4/
 curdir=$(pwd)
 clear
 echo " "
-echo " If this is a fresh DMRGateway install - Select New"
-echo " This will overwrite the /etc/dmrgateway file with a default vsersion"
+echo " If this is a fresh DMRGateway install - Select Item 1 to create and/or edit a  password file."
+echo " "
+echo " Item 2 will overwrite the /etc/dmrgateway file with a default vsersion"
 echo " and proceed with a limited configuration"
 echo " "
-echo " Selecting Update will install the DMRGateway binary file without the "
-echo " the update of the /etc/DMRGateway file."
+echo " Item 2 will Compile (If Required) and Install the Binary File"
 echo " "
 sleep 3
 
@@ -72,7 +77,6 @@ echo "URL $URL1"
 function SetNetworks()
 {
 echo "Running SetNetworks"
-HS="1"
 
 #[DMR Network 1]
 SRCRW="2,9990,2,$CALL,1"
@@ -85,7 +89,7 @@ Id1="$ID""$HS""1"
  
 
 #[DMR Network 2]
-Id="$ID""$HS""2"
+Id1="$ID""$HS""2"
  PWD=$(sed -nr "/^\[DMR Network 2\]/ { :l /^PWD[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $pwf)
  sudo sed -i '/^\[/h;G;/DMR Network 2/s/\(URL=\).*/\1'"$Id"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 2/s/\(Password=\).*/\1'"$PWD"'/m;P;d' /etc/dmrgateway
@@ -93,8 +97,8 @@ Id="$ID""$HS""2"
  sudo sed -i '/^\[/h;G;/DMR Network 2/s/\(Id=\).*/\1'"$Id1"'/m;P;d' /etc/dmrgateway
 
 #[DMR Network 3]
-Id="$ID""$HS""3"
- PWD=$(sed -nr "/^\[DMR Network 3\]/ { :l /^PWD[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" /etc/dmrgwpass)
+Id1="$ID""$HS""3"
+ PWD=$(sed -nr "/^\[DMR Network 3\]/ { :l /^PWD[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $pwf)
  sudo sed -i '/^\[/h;G;/DMR Network 3/s/\(URL=\).*/\1'"$Id"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 3/s/\(Password=\).*/\1'"$PWD"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 3/s/\(SRCRewrite=\).*/\1'"$SRCRW"'/m;P;d' /etc/dmrgateway
@@ -102,8 +106,8 @@ Id="$ID""$HS""3"
 
 
 #[DMR Network 4]
-Id="$ID$HS4"
- PWD=$(sed -nr "/^\[DMR Network 4\]/ { :l /^PWD[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" /etc/dmrgwpass)
+Id1="$ID""$HS""4"
+ PWD=$(sed -nr "/^\[DMR Network 4\]/ { :l /^PWD[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $pwf)
  sudo sed -i '/^\[/h;G;/DMR Network 4/s/\(URL=\).*/\1'"$Id"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 4/s/\(Password=\).*/\1'"$PWD"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 4/s/\(SRCRewrite=\).*/\1'"$SRCRW"'/m;P;d' /etc/dmrgateway
@@ -111,8 +115,8 @@ Id="$ID$HS4"
 
 
 #[DMR Network 5]
-Id="$ID""$HS""5"
- PWD=$(sed -nr "/^\[DMR Network 5\]/ { :l /^PWD[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" /etc/dmrgwpass)
+Id1="$ID""$HS""5"
+ PWD=$(sed -nr "/^\[DMR Network 5\]/ { :l /^PWD[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $pwf)
  sudo sed -i '/^\[/h;G;/DMR Network 5/s/\(URL=\).*/\1'"$Id"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 5/s/\(Password=\).*/\1'"$PWD"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 5/s/\(SRCRewrite=\).*/\1'"$SRCRW"'/m;P;d' /etc/dmrgateway
@@ -120,8 +124,8 @@ Id="$ID""$HS""5"
 
 
 #[DMR Network 6]
-Id="$ID""$HS""6"
- PWD=$(sed -nr "/^\[DMR Network 6\]/ { :l /^PWD[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" /etc/dmrgwpass)
+Id1="$ID""$HS""6"
+ PWD=$(sed -nr "/^\[DMR Network 6\]/ { :l /^PWD[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $pwf)
  sudo sed -i '/^\[/h;G;/DMR Network 6/s/\(URL=\).*/\1'"$Id"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 6/s/\(Password=\).*/\1'"$PWD"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 6/s/\(SRCRewrite=\).*/\1'"$SCRW"'/m;P;d' /etc/dmrgateway
@@ -149,7 +153,7 @@ if [ ! -f /home/pi-star/DMRGateway-4/DMRGateway ]; then
 	echo "Compiling DMRGateway Files"
 	make
 	service_handle stop
-	echo "Copying Binary file to /lkusr/local/bin/"
+	echo "Copying Binary file to /usr/local/bin/"
 	sudo cp /home/pi-star/DMRGateway-4/DMRGateway /usr/local/bin/
 	echo "Starting DMRGateway and MMDVMHost"
 	service_handle start
@@ -158,7 +162,7 @@ else
 	sudo mount -o remount,rw /
 	echo "Stopping DMRGateway and MMDVMHost"
 	service_handle stop
-	echo "Copying Binary file to /lkusr/local/bin/"
+	echo "Copying Binary file to /usr/local/bin/"
 	sudo cp /home/pi-star/DMRGateway-4/DMRGateway /usr/local/bin/
 	echo "Starting DMRGateway and MMDVMHost"
 	service_handle start
@@ -177,7 +181,7 @@ MENU="Select your Installation Mode"
 
 OPTIONS=(1 "Edit the DMRGateway Password File" 
 	 2 "Install DMRGateway & Update /etc/dmrgateway"
-         3 "Install DMRGateway NO Update"
+         3 "Install DMRGateway NO Config File Update"
 	 4 "Quit")
 
 
@@ -207,7 +211,7 @@ case $CHOICE in
 
             ;;
          3)
-            echo "You Chose Install DMRGateway - No Update"		
+            echo "You Chose to Install DMRGateway - No Config File Update"		
 		CopyBin
             ;;
 	4)   echo " You Chose to Quit"
