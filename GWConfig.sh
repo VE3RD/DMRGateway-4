@@ -1,7 +1,7 @@
 #!/bin/bash
 ############################################################
 #  This script will automate the process of                #
-#  Installing and Configuring The DMRGateway-4 		   #
+#  Installing and Configuring The DMRGateway-4 	           #
 #							   #
 #  VE3RD                                      2020/10/04   #
 ############################################################
