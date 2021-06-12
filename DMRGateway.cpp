@@ -440,27 +440,27 @@ int CDMRGateway::run()
       switch(selnet) {
         case 1 : net1ok = true;
 		rf1ok=true;
-        LogInfo("Srartup Net1 Test %d", selnet);
+        LogInfo("Startup Net1 Test %d", selnet);
                 break;
         case 2 : net2ok = true;
 		rf2ok=true;
-        LogInfo("Srartup Net2 Test %d", selnet);
+        LogInfo("Startup Net2 Test %d", selnet);
                 break;
         case 3 : net3ok = true;
 		rf3ok=true;
-        LogInfo("Srartup Net3 Test %d", selnet);
+        LogInfo("Startup Net3 Test %d", selnet);
                 break;
         case 4 : net4ok = true;
 		rf4ok=true;
-        LogInfo("Srartup Net4 Test %d", selnet);
+        LogInfo("Startup Net4 Test %d", selnet);
                 break;
         case 5 : net5ok = true;
 		rf5ok=true;
-        LogInfo("Srartup Net5 Test %d", selnet);
+        LogInfo("Startup Net5 Test %d", selnet);
                 break;
         case 6 : net6ok = true;
 		rf6ok=true;
-        LogInfo("Srartup Net6 Test %d", selnet);
+        LogInfo("Startup Net6 Test %d", selnet);
                 break;
         }
 

@@ -30,7 +30,7 @@ const unsigned int BUFFER_LENGTH = 500U;
 const unsigned int HOMEBREW_DATA_PACKET_LENGTH = 55U;
 
 
-CMMDVMNetwork::CMMDVMNetwork(const std::string& rptAddress, unsigned short rptPort, const std::string& localAddress, unsigned short localPort, unsigned short smartnet, bool debug) :
+CMMDVMNetwork::CMMDVMNetwork(const std::string& rptAddress, unsigned short rptPort, const std::string& localAddress, unsigned short localPort, unsigned short startNet, bool debug) :
 m_rptAddr(),
 m_rptAddrLen(0U),
 m_id(0U),
