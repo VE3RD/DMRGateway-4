@@ -1,7 +1,7 @@
 #!/bin/bash
 ############################################################
 #  This script will automate the process of                #
-#  Installing and Configureing The DMRGateway-4 	   #
+#  Installing and Configuring The DMRGateway-4 		   #
 #							   #
 #  VE3RD                                      2020/10/04   #
 ############################################################
@@ -10,7 +10,7 @@ set -o pipefail
 sudo mount -o remount,rw /
 
 if [ ! "$1" ]; then
-	echo "Please Provisde  a HotSpot Number 0-9"
+	echo "Please Provide  a HotSpot Number 0-9"
 	echo "Syntax:   ./GWConfig.sh 4   to configure hotspot number 4"
 	exit
 fi
@@ -42,9 +42,9 @@ clear
 echo " "
 echo " BASIC INSTRUCTIONS"
 echo " "
-echo " Item 1:	This will create and/or edit a password file. (Required for New a Install)"
+echo " Item 1:	This will create and/or edit a password file. (Required for a new Install)"
 echo " "
-echo " Item 2: 	will overwrite the /etc/dmrgateway file with a default vsersion and"
+echo " Item 2: 	will overwrite the /etc/dmrgateway file with a default version and"
 echo " 		will proceed with a limited configuration and"
 echo " 		will compile a new Binary if required and"
 echo "		will install the Binary DMRGateway File"
@@ -197,7 +197,7 @@ echo -e '\e[1;44m'
 
 case $CHOICE in
         1)
-            echo "Editing The DMRGateway Pasword File"		
+            echo "Editing The DMRGateway Password File"		
 	    if [ !  -f /etc/dmrgwpass ]; then
 		cp /home/pi-star/DMRGateway-4/DMRGateway.pw /etc/dmrgwpass
 	   fi
