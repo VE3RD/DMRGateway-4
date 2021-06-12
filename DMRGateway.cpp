@@ -57,12 +57,14 @@ const unsigned int XLX_TG   = 9U;
 const unsigned char COLOR_CODE = 3U;
 
 unsigned int rdstId = 0;
-static int selnet = 4;
+
+unsigned short selnet = 4;
+
 unsigned int  storedtg =0;
 static bool net1ok = false;
 static bool net2ok = false;
 static bool net3ok = false;
-static bool net4ok = true;
+static bool net4ok = false;
 static bool net5ok = false;
 static bool net6ok = false;
 //static bool allnetok = false;
@@ -70,11 +72,12 @@ static bool net6ok = false;
 static bool rf1ok = false;
 static bool rf2ok = false;
 static bool rf3ok = false;
-static bool rf4ok = true;
+static bool rf4ok = false;
 static bool rf5ok = false;
 static bool rf6ok = false;
 static bool ok2tx = false;
 static int  locknet = 4;
+
 
 void ClearRFNets();
 void ClearNetworks();
@@ -428,6 +431,41 @@ int CDMRGateway::run()
 		delete m_repeater;
 		return 0;
 	}
+
+//////////////
+ unsigned short int StartNet = m_conf.getStartNet(); 
+	
+	selnet = StartNet;
+
+      switch(selnet) {
+        case 1 : net1ok = true;
+		rf1ok=true;
+        LogInfo("Srartup Net1 Test %d", selnet);
+                break;
+        case 2 : net2ok = true;
+		rf2ok=true;
+        LogInfo("Srartup Net2 Test %d", selnet);
+                break;
+        case 3 : net3ok = true;
+		rf3ok=true;
+        LogInfo("Srartup Net3 Test %d", selnet);
+                break;
+        case 4 : net4ok = true;
+		rf4ok=true;
+        LogInfo("Srartup Net4 Test %d", selnet);
+                break;
+        case 5 : net5ok = true;
+		rf5ok=true;
+        LogInfo("Srartup Net5 Test %d", selnet);
+                break;
+        case 6 : net6ok = true;
+		rf6ok=true;
+        LogInfo("Srartup Net6 Test %d", selnet);
+                break;
+        }
+
+
+
 
 	LogMessage("MMDVM has connected");
 
@@ -1620,15 +1658,19 @@ bool CDMRGateway::createMMDVM()
 	unsigned short rptPort   = m_conf.getRptPort();
 	std::string localAddress = m_conf.getLocalAddress();
 	unsigned short localPort = m_conf.getLocalPort();
+	unsigned short startNet = m_conf.getStartNet();
 	bool debug               = m_conf.getDebug();
+
+	selnet=startNet;
 
 	LogInfo("MMDVM Network Parameters");
 	LogInfo("    Rpt Address: %s", rptAddress.c_str());
 	LogInfo("    Rpt Port: %hu", rptPort);
 	LogInfo("    Local Address: %s", localAddress.c_str());
 	LogInfo("    Local Port: %hu", localPort);
+	LogInfo("    Start Net: %hu", startNet);
 
-	m_repeater = new CMMDVMNetwork(rptAddress, rptPort, localAddress, localPort, debug);
+	m_repeater = new CMMDVMNetwork(rptAddress, rptPort, localAddress, localPort, startNet, debug);
 
 	bool ret = m_repeater->open();
 	if (!ret) {

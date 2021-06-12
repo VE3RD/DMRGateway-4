@@ -85,6 +85,7 @@ public:
 	unsigned short getRptPort() const;
 	std::string  getLocalAddress() const;
 	unsigned short getLocalPort() const;
+	unsigned short getStartNet() const;
 	bool         getRuleTrace() const;
 	bool         getDebug() const;
 
@@ -273,6 +274,7 @@ private:
 	unsigned short m_rptPort;
 	std::string  m_localAddress;
 	unsigned short m_localPort;
+	unsigned short m_startNet;
 	unsigned int m_rfTimeout;
 	unsigned int m_netTimeout;
 	bool         m_ruleTrace;

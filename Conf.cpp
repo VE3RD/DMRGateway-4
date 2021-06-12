@@ -52,6 +52,7 @@ m_rptAddress("127.0.0.1"),
 m_rptPort(62032U),
 m_localAddress("127.0.0.1"),
 m_localPort(62031U),
+m_startNet(4U),
 m_rfTimeout(10U),
 m_netTimeout(10U),
 m_ruleTrace(false),
@@ -307,6 +308,8 @@ bool CConf::read()
 				m_localAddress = value;
 			else if (::strcmp(key, "LocalPort") == 0)
 				m_localPort = (unsigned short)::atoi(value);
+			else if (::strcmp(key, "StartNet") == 0)
+				m_startNet = (unsigned short)::atoi(value);
 			else if (::strcmp(key, "RuleTrace") == 0)
 				m_ruleTrace = ::atoi(value) == 1;
 			else if (::strcmp(key, "Debug") == 0)
@@ -1164,6 +1167,10 @@ std::string CConf::getLocalAddress() const
 unsigned short CConf::getLocalPort() const
 {
 	return m_localPort;
+}
+unsigned short CConf::getStartNet() const
+{
+	return m_startNet;
 }
 
 unsigned int CConf::getRFTimeout() const
