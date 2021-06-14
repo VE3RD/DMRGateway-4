@@ -57,14 +57,12 @@ const unsigned int XLX_TG   = 9U;
 const unsigned char COLOR_CODE = 3U;
 
 unsigned int rdstId = 0;
-
-unsigned short selnet = 4;
-
+static int selnet = 4;
 unsigned int  storedtg =0;
 static bool net1ok = false;
 static bool net2ok = false;
 static bool net3ok = false;
-static bool net4ok = false;
+static bool net4ok = true;
 static bool net5ok = false;
 static bool net6ok = false;
 //static bool allnetok = false;
@@ -72,12 +70,11 @@ static bool net6ok = false;
 static bool rf1ok = false;
 static bool rf2ok = false;
 static bool rf3ok = false;
-static bool rf4ok = false;
+static bool rf4ok = true;
 static bool rf5ok = false;
 static bool rf6ok = false;
 static bool ok2tx = false;
-static int  locknet = 4;
-
+static int  locknet = 0;
 
 void ClearRFNets();
 void ClearNetworks();
@@ -432,41 +429,6 @@ int CDMRGateway::run()
 		return 0;
 	}
 
-//////////////
- unsigned short int StartNet = m_conf.getStartNet(); 
-	
-	selnet = StartNet;
-
-      switch(selnet) {
-        case 1 : net1ok = true;
-		rf1ok=true;
-        LogInfo("Startup Net1 Test %d", selnet);
-                break;
-        case 2 : net2ok = true;
-		rf2ok=true;
-        LogInfo("Startup Net2 Test %d", selnet);
-                break;
-        case 3 : net3ok = true;
-		rf3ok=true;
-        LogInfo("Startup Net3 Test %d", selnet);
-                break;
-        case 4 : net4ok = true;
-		rf4ok=true;
-        LogInfo("Startup Net4 Test %d", selnet);
-                break;
-        case 5 : net5ok = true;
-		rf5ok=true;
-        LogInfo("Startup Net5 Test %d", selnet);
-                break;
-        case 6 : net6ok = true;
-		rf6ok=true;
-        LogInfo("Startup Net6 Test %d", selnet);
-                break;
-        }
-
-
-
-
 	LogMessage("MMDVM has connected");
 
 #if defined(USE_GPSD)
@@ -773,9 +735,14 @@ int CDMRGateway::run()
 					rfSrcId[slotNo] = srcId;
 					rfDstId[slotNo] = dstId;
 					trace = true;
-					LogDebug("Rule Trace, RF transmission: Slot=%u Src=%u Dst=%s%u", slotNo, srcId, flco == FLCO_GROUP ? "TG" : "", dstId);
 				}
+                                if ( rdstId != dstId ) {
+                                        rdstId = dstId;
+					trace=true;
+                                }
 
+				if (trace)
+					LogDebug("Rule Trace, RF transmission: Slot=%u Src=%u Dst=%s%u", slotNo, srcId, flco == FLCO_GROUP ? "TG" : "", dstId);
 
 				PROCESS_RESULT result = RESULT_UNMATCHED;
 
@@ -820,7 +787,7 @@ int CDMRGateway::run()
                                         ok2tx=true;
                                         }
 
-				
+
 				ok2tx = true;
                                 if ( dstId >= 9000 && dstId <= 9008 ) ok2tx = false;
                            	
@@ -865,11 +832,13 @@ int CDMRGateway::run()
 
                                         }
                                         
-	if ( trace ) LogInfo("RF transmission: Net=%u, Slot=%u Src=%u Dst=%s%u", selnet, slotNo, srcId, flco == FLCO_GROUP ? "TG" : "", dstId);
-        if ( trace ) LogInfo("RF1OK:%s    RF2OK:%s   RF3OK:%s   RF4OK:%s   RF5OK:%s   RF6OK:%s", rf1ok ? "yes" : "no ", rf2ok ? "yes" : "no ", rf3ok ? "yes" : "no ", rf4ok ? "yes" : "no ", rf5ok ? "yes" : "no ", rf6ok ? "yes" : "no" );        
-	if ( trace ) LogInfo("NET1OK:%s   NET2OK:%s  NET3OK:%s  NET4OK:%s  NET5OK:%s  NET6OK:%s", net1ok ? "yes" : "no ", net2ok ? "yes" : "no ", net3ok ? "yes" : "no ",  net4ok ? "yes" : "no ", net5ok ? "yes" : "no ", net6ok ? "yes" : "no " );
-        if ( trace ) LogInfo("Network Locked = %d    OK to TX:%s", locknet, ok2tx ? "Yes" : "No" );
-	if ( trace ) LogInfo("RFRX Net %d Dest: %d From: %d", selnet, dstId, srcId);
+				 if ( trace ) LogInfo("RF transmission: Net=%u, Slot=%u Src=%u Dst=%s%u", selnet, slotNo, srcId, flco == FLCO_GROUP ? "TG" : "", dstId);
+                                 if ( trace ) LogInfo("RF1OK:%s    RF2OK:%s   RF3OK:%s", rf1ok ? "yes" : "no ", rf2ok ? "yes" : "no ", rf3ok ? "yes" : "no " );
+                                 if ( trace ) LogInfo("RF4OK:%s    RF5OK:%s   RF6OK:%s", rf4ok ? "yes" : "no ", rf5ok ? "yes" : "no ", rf6ok ? "yes" : "no " );
+                                 if ( trace ) LogInfo("NET1OK:%s   NET2OK:%s  NET3OK:%s", net1ok ? "yes" : "no ", net2ok ? "yes" : "no ", net3ok ? "yes" : "no " );
+                                 if ( trace ) LogInfo("NET4OK:%s   NET5OK:%s  NET6OK:%s", net4ok ? "yes" : "no ", net5ok ? "yes" : "no ", net6ok ? "yes" : "no " );
+                                 if ( trace ) LogInfo("Network Locked = %d    OK to TX:%s", locknet, ok2tx ? "Yes" : "No" );
+
 
 
 				if (m_network1Enabled && (m_dmrNetwork1 != NULL) && rf1ok && ok2tx) {
@@ -889,7 +858,6 @@ int CDMRGateway::run()
 							m_status[slotNo] = DMRGWS_DMRNETWORK1;
 							timer[slotNo]->setTimeout(rfTimeout);
 							timer[slotNo]->start();
-						//	LogInfo("RFRX Net1 Dest: %d From: %d", dstId, srcId);
 						}
 					}
 				}
@@ -912,7 +880,6 @@ int CDMRGateway::run()
 								m_status[slotNo] = DMRGWS_DMRNETWORK2;
 								timer[slotNo]->setTimeout(rfTimeout);
 								timer[slotNo]->start();
-								LogInfo("RFRX Net2 Dest: %d From: %d", dstId, srcId);
 							}
 						}
 					}
@@ -935,9 +902,7 @@ int CDMRGateway::run()
 								m_dmrNetwork3->write(data);
 								m_status[slotNo] = DMRGWS_DMRNETWORK3;
 								timer[slotNo]->setTimeout(rfTimeout);
-						//	LogInfo("RFRX Net3 Dest: %d From: %d", dstId, srcId);
 								timer[slotNo]->start();
-
 							}
 						}
 					}
@@ -961,8 +926,6 @@ int CDMRGateway::run()
 								m_status[slotNo] = DMRGWS_DMRNETWORK4;
 								timer[slotNo]->setTimeout(rfTimeout);
 								timer[slotNo]->start();
-						//	LogInfo("RFRX Net4 Dest: %d From: %d", dstId, srcId);
-
 							}
 						}
 					}
@@ -986,8 +949,6 @@ int CDMRGateway::run()
 								m_status[slotNo] = DMRGWS_DMRNETWORK5;
 								timer[slotNo]->setTimeout(rfTimeout);
 								timer[slotNo]->start();
-						//	LogInfo("RFRX Net5 Dest: %d From: %d", dstId, srcId);
-
 							}
 						}
 					}
@@ -1011,7 +972,6 @@ int CDMRGateway::run()
 								m_status[slotNo] = DMRGWS_DMRNETWORK6;
 								timer[slotNo]->setTimeout(rfTimeout);
 								timer[slotNo]->start();
-						//	LogInfo("RFRX Net6 Dest: %d From: %d", dstId, srcId);
 							}
 						}
 					}
@@ -1187,14 +1147,14 @@ int CDMRGateway::run()
 				unsigned int srcId  = data.getSrcId();
 				unsigned int dstId  = data.getDstId();
 				FLCO flco           = data.getFLCO();
-rdstId=0;
+
 				bool trace = false;
 //				if (ruleTrace && (srcId != dmr1SrcId[slotNo] || dstId != dmr1DstId[slotNo])) {
 				if (srcId != dmr1SrcId[slotNo] || dstId != dmr1DstId[slotNo]) {
 					dmr1SrcId[slotNo] = srcId;
 					dmr1DstId[slotNo] = dstId;
 					trace = true;
-					LogInfo("NetRX Net 1 transmission: Slot: %u Src: %u Dst: %s%u", slotNo, srcId, flco == FLCO_GROUP ? "TG" : "", dstId);
+					LogInfo("Rule Trace, Network 1 transmission: Slot=%u Src=%u Dst=%s%u", slotNo, srcId, flco == FLCO_GROUP ? "TG" : "", dstId);
 				}
 
 				if (trace) LogDebug("Rule Trace, network 1 transmission: Slot=%u Src=%u Dst=%s%u", slotNo, srcId, flco == FLCO_GROUP ? "TG" : "", dstId);
@@ -1239,14 +1199,13 @@ rdstId=0;
 				unsigned int srcId  = data.getSrcId();
 				unsigned int dstId  = data.getDstId();
 				FLCO flco           = data.getFLCO();
-rdstId=0;
 
 				bool trace = false;
 				if (srcId != dmr2SrcId[slotNo] || dstId != dmr2DstId[slotNo]) {
 					dmr2SrcId[slotNo] = srcId;
 					dmr2DstId[slotNo] = dstId;
 					trace = true;
-					LogInfo("NetRX Net 2 transmission: Slot: %u Src: %u Dst: %s%u", slotNo, srcId, flco == FLCO_GROUP ? "TG" : "", dstId);
+					LogInfo("Rule Trace, Network 2 transmission: Slot=%u Src=%u Dst=%s%u", slotNo, srcId, flco == FLCO_GROUP ? "TG" : "", dstId);
 
 				}
 
@@ -1294,12 +1253,11 @@ rdstId=0;
 				unsigned int dstId = data.getDstId();
 				FLCO flco = data.getFLCO();
 
-rdstId=0;
 				bool trace = false;
 				if (srcId != dmr3SrcId[slotNo] || dstId != dmr3DstId[slotNo]) {
 					dmr3SrcId[slotNo] = srcId;
 					dmr3DstId[slotNo] = dstId;
-					LogInfo("NetRX Net 3 transmission: Slot: %u Src: %u Dst: %s%u", slotNo, srcId, flco == FLCO_GROUP ? "TG" : "", dstId);
+					LogInfo("Rule Trace, Network 2 transmission: Slot=%u Src=%u Dst=%s%u", slotNo, srcId, flco == FLCO_GROUP ? "TG" : "", dstId);
 					trace = true;
 				}
 
@@ -1345,7 +1303,6 @@ rdstId=0;
 				unsigned int srcId = data.getSrcId();
 				unsigned int dstId = data.getDstId();
 				FLCO flco = data.getFLCO();
-rdstId=0;
 
 				bool trace = false;
 
@@ -1353,7 +1310,7 @@ rdstId=0;
 					dmr4SrcId[slotNo] = srcId;
 					dmr4DstId[slotNo] = dstId;
 					trace = true;
-					LogInfo("NetRX Net 4 transmission: Slot: %u Src: %u Dst: %s%u", slotNo, srcId, flco == FLCO_GROUP ? "TG" : "", dstId);
+					LogInfo("Rule Trace, Network 4 transmission: Slot=%u Src=%u Dst=%s%u", slotNo, srcId, flco == FLCO_GROUP ? "TG" : "", dstId);
 				}
 
 
@@ -1399,14 +1356,13 @@ rdstId=0;
 				unsigned int srcId = data.getSrcId();
 				unsigned int dstId = data.getDstId();
 				FLCO flco = data.getFLCO();
-rdstId=0;
 
 				bool trace = false;
 				if (srcId != dmr5SrcId[slotNo] || dstId != dmr5DstId[slotNo]) {
 					dmr5SrcId[slotNo] = srcId;
 					dmr5DstId[slotNo] = dstId;
 					trace = true;
-					LogInfo("NetRX Net 5 transmission: Slot: %u Src: %u Dst: %s%u", slotNo, srcId, flco == FLCO_GROUP ? "TG" : "", dstId);
+					LogInfo("Rule Trace, Network 5 transmission: Slot=%u Src=%u Dst=%s%u", slotNo, srcId, flco == FLCO_GROUP ? "TG" : "", dstId);
 
 				}
 
@@ -1452,14 +1408,13 @@ rdstId=0;
 				unsigned int srcId = data.getSrcId();
 				unsigned int dstId = data.getDstId();
 				FLCO flco = data.getFLCO();
-rdstId=0;
 
 				bool trace = false;
 				if (srcId != dmr6SrcId[slotNo] || dstId != dmr6DstId[slotNo]) {
 					dmr6SrcId[slotNo] = srcId;
 					dmr6DstId[slotNo] = dstId;
 					trace = true;
-					LogInfo("NetRX Net 6 transmission: Slot: %u Src: %u Dst: %s%u", slotNo, srcId, flco == FLCO_GROUP ? "TG" : "", dstId);
+					LogInfo("Rule Trace, Network 6 transmission: Slot=%u Src=%u Dst=%s%u", slotNo, srcId, flco == FLCO_GROUP ? "TG" : "", dstId);
 
 				}
 
@@ -1665,19 +1620,15 @@ bool CDMRGateway::createMMDVM()
 	unsigned short rptPort   = m_conf.getRptPort();
 	std::string localAddress = m_conf.getLocalAddress();
 	unsigned short localPort = m_conf.getLocalPort();
-	unsigned short startNet = m_conf.getStartNet();
 	bool debug               = m_conf.getDebug();
-
-	selnet=startNet;
 
 	LogInfo("MMDVM Network Parameters");
 	LogInfo("    Rpt Address: %s", rptAddress.c_str());
 	LogInfo("    Rpt Port: %hu", rptPort);
 	LogInfo("    Local Address: %s", localAddress.c_str());
 	LogInfo("    Local Port: %hu", localPort);
-	LogInfo("    Start Net: %hu", startNet);
 
-	m_repeater = new CMMDVMNetwork(rptAddress, rptPort, localAddress, localPort, startNet, debug);
+	m_repeater = new CMMDVMNetwork(rptAddress, rptPort, localAddress, localPort, debug);
 
 	bool ret = m_repeater->open();
 	if (!ret) {
