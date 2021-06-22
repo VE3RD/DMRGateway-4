@@ -53,6 +53,9 @@ echo " Item 3: 	will Ignore the existing Configuration File and"
 echo "        	will Compile a new Binary if Required and "
 echo "        	will Install the Binary File"
 echo " "
+echo " Item 4:	will Restore the Original DMRGateway from /usr/local/bin/DMRGateway.orig"
+echo " 		( If it exists )"
+echo " "
 #sleep 3
 read -n 1 -s -r -p "Press any key to Continue"
 
@@ -70,6 +73,7 @@ DES=$(sed -nr "/^\[Info\]/ { :l /^Description[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b 
 
 
 #URL=$(sed -nr "/^\[Info\]/ { :l /^URL[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" /etc/mmdvmhost)
+sudo mount -o remount,rw /
 
  sudo sed -i '/^\[/h;G;/Info/s/\(Latitude=\).*/\1'"$LAT"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/Info/s/\(Id=\).*/\1'"$LON"'/m;P;d' /etc/dmrgateway
@@ -187,7 +191,8 @@ MENU="Select your Installation Mode"
 OPTIONS=(1 "Create/Edit the DMRGateway Password File" 
 	 2 "Install DMRGateway & Update /etc/dmrgateway"
          3 "Install DMRGateway NO Config File Update"
-	 4 "Quit")
+	 4 "Restore Original DMRGateway Binary File"
+	 5 "Quit")
 
 
 CHOICE=$(dialog --clear \
@@ -221,7 +226,18 @@ case $CHOICE in
             echo "You Chose to Install DMRGateway - No Config File Update"		
 		CopyBin
             ;;
-	4)   echo " You Chose to Quit"
+	4)   echo " You Chose to Restore The Original DMRGateway"
+		if [ -f /usr/local/bin/DMRGateway.orig ]; then
+			sudo systemctl stop dmrgateway.service
+			sudo cp /usr/local/bin/DMRGateway.orig /usr/local/bin/DMRGateway
+			sudo systemctl start dmrgateway.service
+			echo "Restore Complete"
+		else
+			echo "The DMRGateway original file does NOT exist"
+			echo "Unable to Restore Original DMRGateway Binary File"
+		fi
+		;;
+	5)   echo " You Chose to Quit"
 		exit
 	;;
 esac
