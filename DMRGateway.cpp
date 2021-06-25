@@ -434,6 +434,7 @@ int CDMRGateway::run()
 
 //////////////
  unsigned short int StartNet = m_conf.getStartNet(); 
+ unsigned short int GWMode = m_conf.getGWMode(); 
 	
 	selnet = StartNet;
 
@@ -779,7 +780,7 @@ int CDMRGateway::run()
 
 				PROCESS_RESULT result = RESULT_UNMATCHED;
 
-
+				
                                 if ( dstId == 9000 ) {
                                         storedtg = dstId;
                                         ok2tx=false;
@@ -807,18 +808,34 @@ int CDMRGateway::run()
                                                 ok2tx=false;
                                 }
 
-                                if ( dstId > 9999999 ) {
-                                        ClearNetworks();
-                                        ClearRFNets();
-                                        if ( trace ) LogInfo("Radio TG Keyed = %d",dstId);
-                                        selnet = ( dstId / 1000000 );
-                                        selnet = selnet - 10;
-                                        if (trace ) LogInfo("Calculated Network = %d",selnet);
-                                  //      LogDebug("Calculated TG = %d",dstId);
-                                  //      LogInfo("Selected 7x Network = %d",selnet);
-                                        locknet = selnet;
-                                        ok2tx=true;
+				if ( GWMode == 7 ){
+                                	if ( dstId > 999999 ) {
+                                        	ClearNetworks();
+                                        	ClearRFNets();
+                                        	if ( trace ) LogInfo("Radio TG Keyed = %d",dstId);
+                                        	selnet = ( dstId / 1000000 );
+                                        	if (trace ) LogInfo("Calculated Network = %d",selnet);
+                                  //      	LogDebug("Calculated TG = %d",dstId);
+                                        	if (trace) LogInfo("Selected 7x Network = %d",selnet);
+                                        	locknet = selnet;
+                                        	ok2tx=true;
                                         }
+
+				}else{
+
+                                	if ( dstId > 9999999 ) {
+                                        	ClearNetworks();
+                                        	ClearRFNets();
+                                        	if ( trace ) LogInfo("Radio TG Keyed = %d",dstId);
+                                        	selnet = ( dstId / 1000000 );
+                                        	selnet = selnet - 10;
+                                        	if (trace ) LogInfo("Calculated Network = %d",selnet);
+                                  //      	LogDebug("Calculated TG = %d",dstId);
+                                        	if (trace) LogInfo("Selected 8x Network = %d",selnet);
+                                        	locknet = selnet;
+                                        	ok2tx=true;
+                                        }
+				}
 
 				
 				ok2tx = true;
@@ -889,7 +906,7 @@ int CDMRGateway::run()
 							m_status[slotNo] = DMRGWS_DMRNETWORK1;
 							timer[slotNo]->setTimeout(rfTimeout);
 							timer[slotNo]->start();
-						//	LogInfo("RFRX Net1 Dest: %d From: %d", dstId, srcId);
+							if (trace) LogInfo("RFRX Net 1 Dest: %d From: %d", dstId, srcId);
 						}
 					}
 				}
@@ -912,7 +929,7 @@ int CDMRGateway::run()
 								m_status[slotNo] = DMRGWS_DMRNETWORK2;
 								timer[slotNo]->setTimeout(rfTimeout);
 								timer[slotNo]->start();
-								LogInfo("RFRX Net2 Dest: %d From: %d", dstId, srcId);
+								if (trace) LogInfo("RFRX Net 2 Dest: %d From: %d", dstId, srcId);
 							}
 						}
 					}
@@ -935,7 +952,7 @@ int CDMRGateway::run()
 								m_dmrNetwork3->write(data);
 								m_status[slotNo] = DMRGWS_DMRNETWORK3;
 								timer[slotNo]->setTimeout(rfTimeout);
-						//	LogInfo("RFRX Net3 Dest: %d From: %d", dstId, srcId);
+								if (trace) LogInfo("RFRX Net 3 Dest: %d From: %d", dstId, srcId);
 								timer[slotNo]->start();
 
 							}
@@ -961,7 +978,7 @@ int CDMRGateway::run()
 								m_status[slotNo] = DMRGWS_DMRNETWORK4;
 								timer[slotNo]->setTimeout(rfTimeout);
 								timer[slotNo]->start();
-						//	LogInfo("RFRX Net4 Dest: %d From: %d", dstId, srcId);
+								if (trace) LogInfo("RFRX Net 4 Dest: %d From: %d", dstId, srcId);
 
 							}
 						}
@@ -986,7 +1003,7 @@ int CDMRGateway::run()
 								m_status[slotNo] = DMRGWS_DMRNETWORK5;
 								timer[slotNo]->setTimeout(rfTimeout);
 								timer[slotNo]->start();
-						//	LogInfo("RFRX Net5 Dest: %d From: %d", dstId, srcId);
+								if (trace) LogInfo("RFRX Net 5 Dest: %d From: %d", dstId, srcId);
 
 							}
 						}
@@ -1011,7 +1028,7 @@ int CDMRGateway::run()
 								m_status[slotNo] = DMRGWS_DMRNETWORK6;
 								timer[slotNo]->setTimeout(rfTimeout);
 								timer[slotNo]->start();
-						//	LogInfo("RFRX Net6 Dest: %d From: %d", dstId, srcId);
+								if (trace) LogInfo("RFRX Net 6 Dest: %d From: %d", dstId, srcId);
 							}
 						}
 					}
@@ -1666,6 +1683,7 @@ bool CDMRGateway::createMMDVM()
 	std::string localAddress = m_conf.getLocalAddress();
 	unsigned short localPort = m_conf.getLocalPort();
 	unsigned short startNet = m_conf.getStartNet();
+//	unsigned short gwMode = m_conf.getGWMode();
 	bool debug               = m_conf.getDebug();
 
 	selnet=startNet;
@@ -1676,6 +1694,7 @@ bool CDMRGateway::createMMDVM()
 	LogInfo("    Local Address: %s", localAddress.c_str());
 	LogInfo("    Local Port: %hu", localPort);
 	LogInfo("    Start Net: %hu", startNet);
+//	LogInfo("    GW Mode: %hu", gwMode);
 
 	m_repeater = new CMMDVMNetwork(rptAddress, rptPort, localAddress, localPort, startNet, debug);
 
