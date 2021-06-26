@@ -75,6 +75,11 @@ echo " "
 #sleep 3
 read -n 1 -s -r -p "Press any key to Continue"
 
+function TurnOnGW()
+{
+ sudo sed -i '/^\[/h;G;/DMR Network/s/\(Address=\).*/\1'"127.0.0.1"'/m;P;d' /etc/mmdvmhost
+}
+
 function GetSetInfo()
 {
 echo "Running GetSetInfo"
@@ -117,6 +122,8 @@ echo "URL $URL1"
 function SetNetworks()
 {
 echo "Running SetNetworks"
+
+TurnOnGW
 
 #[DMR Network 1]
 SRCRW="2,9990,2,$CALL,1"
