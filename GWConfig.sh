@@ -42,19 +42,35 @@ clear
 echo " "
 echo " BASIC INSTRUCTIONS"
 echo " "
-echo " Item 1:	This will create and/or edit a password file. (Required for a new Install)"
+echo " Item 1:"
+echo "	This will create and/or edit a password file. (Required for a new Install)"
 echo " "
-echo " Item 2: 	will overwrite the /etc/dmrgateway file with a default version and"
-echo " 		will proceed with a limited configuration and"
-echo " 		will compile a new Binary if required and"
-echo "		will install the Binary DMRGateway File"
+echo " Item 2, 3 and 4 Common:"
+echo " 	This will overwrite the /etc/dmrgateway file with a default version and"
+echo " 	will compile a new Binary if required and"
+echo "	will install the Binary DMRGateway File"
 echo " "
-echo " Item 3: 	will Ignore the existing Configuration File and"
-echo "        	will Compile a new Binary if Required and "
-echo "        	will Install the Binary File"
+echo " Item 2"
+echo " 	will proceed with a limited configuration Using Basic Mode"
+echo " 	In the Radio CPS use basic 31665 for 31665 on the Server"
+echo "	Key on Tg 9001 to 9006 to select Network 1 to 6"
 echo " "
-echo " Item 4:	will Restore the Original DMRGateway from /usr/local/bin/DMRGateway.orig"
-echo " 		( If it exists )"
+echo " Item 3"
+echo " 	will proceed with a limited configuration Using 8 Digit Translation Mode"
+echo "	In the Radio CPS use 14031665 for TG 31665 on Network 4 etc."
+echo " "
+echo " Item 4"
+echo " 	will proceed with a limited configuration Using 7 Digit Trans;ation Mode"
+echo "	In the Radio CPS use 4031665 for TG 31665 on Network 4"
+echo " "
+echo " Item 5:"
+echo "	will Ignore the existing Configuration File and"
+echo "	will Compile a new Binary if Required and "
+echo "	will Install the Binary File"
+echo " "
+echo " Item 6:"
+echo "	will Restore the Original DMRGateway from /usr/local/bin/DMRGateway.orig"
+echo "	( If it exists )"
 echo " "
 #sleep 3
 read -n 1 -s -r -p "Press any key to Continue"
@@ -85,6 +101,11 @@ sudo mount -o remount,rw /
 SN=$(sed -nr "/^\[General\]/ { :l /^StartNet[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" /etc/dmrgateway)
 if [ ! "$SN" ]; then 
 sed -i 's/\[General\]/\[General\]\nStartNet=4/g' /etc/dmrgateway 
+fi
+
+GWM=$(sed -nr "/^\[General\]/ { :l /^GWMode[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" /etc/dmrgateway)
+if [ ! "$GWM" ]; then 
+sed -i 's/\[General\]/\[General\]\nGWMode=8/g' /etc/dmrgateway 
 fi
 
 URL1="HTTP:\/\/www.qrz.com\/db\/$CALL"
@@ -164,6 +185,35 @@ Id1="$ID""$HS""6"
 
 
 }
+function GWMode0(){
+ sudo sed -i '/^\[/h;G;/DMR Network 1/s/\(TGRewrite0=\).*/\1'"2,1,2,1,999999"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 2/s/\(TGRewrite0=\).*/\1'"2,1,2,1,999999"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 3/s/\(TGRewrite0=\).*/\1'"2,1,2,1,999999"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 4/s/\(TGRewrite0=\).*/\1'"2,1,2,1,999999"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 5/s/\(TGRewrite0=\).*/\1'"2,1,2,1,999999"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 6/s/\(TGRewrite0=\).*/\1'"2,1,2,1,999999"'/m;P;d' /etc/dmrgateway
+
+}
+
+function GWMode8(){
+ sudo sed -i '/^\[/h;G;/DMR Network 1/s/\(TGRewrite0=\).*/\1'"2,11000001,2,1,9999999"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 2/s/\(TGRewrite0=\).*/\1'"2,12000001,2,1,9999999"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 3/s/\(TGRewrite0=\).*/\1'"2,13000001,2,1,9999999"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 4/s/\(TGRewrite0=\).*/\1'"2,14000001,2,1,9999999"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 5/s/\(TGRewrite0=\).*/\1'"2,15000001,2,1,9999999"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 6/s/\(TGRewrite0=\).*/\1'"2,16000001,2,1,9999999"'/m;P;d' /etc/dmrgateway
+}
+
+function GWMode7(){
+ sudo sed -i '/^\[/h;G;/DMR Network 1/s/\(TGRewrite0=\).*/\1'"2,1000001,2,1,999999"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 2/s/\(TGRewrite0=\).*/\1'"2,2000001,2,1,999999"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 3/s/\(TGRewrite0=\).*/\1'"2,3000001,2,1,999999"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 4/s/\(TGRewrite0=\).*/\1'"2,4000001,2,1,999999"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 5/s/\(TGRewrite0=\).*/\1'"2,5000001,2,1,999999"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 6/s/\(TGRewrite0=\).*/\1'"2,6000001,2,1,999999"'/m;P;d' /etc/dmrgateway
+
+}
+
 function CopyBin()
 {
 echo "Running CopyBin"
@@ -182,17 +232,19 @@ fi
 function Menu
 {
 HEIGHT=15
-WIDTH=60
+WIDTH=90
 CHOICE_HEIGHT=7
 BACKTITLE="This SCRIPT will Install the DMRGateway-4 by VE3RD"
 TITLE="Main Menu - DMRGateway Options"
 MENU="Select your Installation Mode"
 
 OPTIONS=(1 "Create/Edit the DMRGateway Password File" 
-	 2 "Install DMRGateway & Update /etc/dmrgateway"
-         3 "Install DMRGateway NO Config File Update"
-	 4 "Restore Original DMRGateway Binary File"
-	 5 "Quit")
+	 2 "Install DMRGateway & Update /etc/dmrgateway - Basic Mode"
+	 3 "Install DMRGateway & Update /etc/dmrgateway - 8 Digit Translation Mode"
+	 4 "Install DMRGateway & Update /etc/dmrgateway - 7 Digit Translation Mode"
+         5 "Install DMRGateway NO Config File Update"
+	 6 "Restore Original DMRGateway Binary File"
+	 7  "Quit")
 
 
 CHOICE=$(dialog --clear \
@@ -216,17 +268,32 @@ case $CHOICE in
 		nano /etc/dmrgwpass
 		Menu
             ;;
-         2)   echo "You Chose to Install DMRGateway with an update to /etc/dmrgateway"
+         2)   echo "You Chose to Install DMRGateway - Basic Mode"
 		sudo cp /home/pi-star/DMRGateway-4/DMRGateway.ini /etc/dmrgateway
 		GetSetInfo
 		SetNetworks
 		CopyBin
+		GWMode0
             ;;
-         3)
+         3)   echo "You Chose to Install DMRGateway - 8 Digit Translation Mode"
+		sudo cp /home/pi-star/DMRGateway-4/DMRGateway.ini /etc/dmrgateway
+		GetSetInfo
+		SetNetworks
+		CopyBin
+		GWMode8
+            ;;
+         4)   echo "You Chose to Install DMRGateway - 7 Digit Translation Mode"
+		sudo cp /home/pi-star/DMRGateway-4/DMRGateway.ini /etc/dmrgateway
+		GetSetInfo
+		SetNetworks
+		CopyBin
+		GWMode7
+            ;;
+         5)
             echo "You Chose to Install DMRGateway - No Config File Update"		
 		CopyBin
             ;;
-	4)   echo " You Chose to Restore The Original DMRGateway"
+	6)   echo " You Chose to Restore The Original DMRGateway"
 		if [ -f /usr/local/bin/DMRGateway.orig ]; then
 			sudo systemctl stop dmrgateway.service
 			sudo cp /usr/local/bin/DMRGateway.orig /usr/local/bin/DMRGateway
@@ -237,7 +304,7 @@ case $CHOICE in
 			echo "Unable to Restore Original DMRGateway Binary File"
 		fi
 		;;
-	5)   echo " You Chose to Quit"
+	7)   echo " You Chose to Quit"
 		exit
 	;;
 esac
