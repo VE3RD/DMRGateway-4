@@ -61,7 +61,7 @@ echo "	In the Radio CPS use 14031665 for TG 31665 on Network 4 etc."
 echo " "
 echo " Item 4"
 echo " 	will proceed with a limited configuration Using 7 Digit Translation Mode"
-echo "	In the Radio CPS use 4031665 for TG 31665 on Network 4 etc."
+echo "	In the Radio CPS use 4031665 for TG 31665 on Network 4 etc "
 echo " "
 echo " Item 5:"
 echo "	will Ignore the existing Configuration File and"
@@ -146,8 +146,6 @@ Id1="$ID""$HS""2"
  sudo sed -i '/^\[/h;G;/DMR Network 2/s/\(SRCRewrite=\).*/\1'"$SRCRW"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 2/s/\(Id=\).*/\1'"$Id1"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 2/s/\(Enabled=\).*/\1'"$ENAB"'/m;P;d' /etc/dmrgateway
- sudo sed -i '/^\[/h;G;/General/s/\(GWMode=\).*/\10/m;P;d' /etc/dmrgateway
- sudo sed -i '/^\[/h;G;/General/s/\(GWMode=\).*/\10/m;P;d' /etc/dmrgateway
 
 #[DMR Network 3]
 Id1="$ID""$HS""3"
@@ -158,7 +156,6 @@ Id1="$ID""$HS""3"
  sudo sed -i '/^\[/h;G;/DMR Network 3/s/\(SRCRewrite=\).*/\1'"$SRCRW"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 3/s/\(Id=\).*/\1'"$Id1"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 3/s/\(Enabled=\).*/\1'"$ENAB"'/m;P;d' /etc/dmrgateway
- sudo sed -i '/^\[/h;G;/General/s/\(GWMode=\).*/\18/m;P;d' /etc/dmrgateway
 
 
 #[DMR Network 4]
@@ -170,7 +167,6 @@ Id1="$ID""$HS""4"
  sudo sed -i '/^\[/h;G;/DMR Network 4/s/\(SRCRewrite=\).*/\1'"$SRCRW"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 4/s/\(Id=\).*/\1'"$Id1"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 4/s/\(Enabled=\).*/\1'"$ENAB"'/m;P;d' /etc/dmrgateway
- sudo sed -i '/^\[/h;G;/General/s/\(GWMode=\).*/\17/m;P;d' /etc/dmrgateway
 
 
 #[DMR Network 5]
