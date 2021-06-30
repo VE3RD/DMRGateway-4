@@ -72,6 +72,9 @@ echo " Item 6:"
 echo "	will Restore the Original DMRGateway from /usr/local/bin/DMRGateway.orig"
 echo "	( If it exists )"
 echo " "
+echo " CAUTION: This script can not possibly handle all users special situations"
+echo " Use nano /etc/dmrgateway to check and configure what the script misses"
+echo " "
 #sleep 3
 read -n 1 -s -r -p "Press any key to Continue"
 
@@ -97,7 +100,8 @@ DES=$(sed -nr "/^\[Info\]/ { :l /^Description[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b 
 sudo mount -o remount,rw /
 
  sudo sed -i '/^\[/h;G;/Info/s/\(Latitude=\).*/\1'"$LAT"'/m;P;d' /etc/dmrgateway
- sudo sed -i '/^\[/h;G;/Info/s/\(Id=\).*/\1'"$LON"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/Info/s/\(Longitude=\).*/\1'"$LON"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/Info/s/\(Id=\).*/\1'"$ID"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/Info/s/\(RXFrequency=\).*/\1'"$RXF"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/Info/s/\(TXFrequency=\).*/\1'"$TXF"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/Info/s/\(Location=\).*/\1'"$LOC"'/m;P;d' /etc/dmrgateway
@@ -225,6 +229,39 @@ function GWMode7(){
 
 }
 
+function Parrot8()
+{
+# Net1
+ sudo sed -i '/^\[/h;G;/DMR Network 1/s/\(PCRewrite0=\).*/\1'"2,11009990,2,9990,1"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 1/s/\(SrcRewrite0=\).*/\1'"2,11009990,2,$CALL,1"'/m;P;d' /etc/dmrgateway
+# Net4
+ sudo sed -i '/^\[/h;G;/DMR Network 4/s/\(PCRewrite0=\).*/\1'"2,14009990,2,9990,1"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 4/s/\(SrcRewrite0=\).*/\1'"2,14009990,2,$CALL,1"'/m;P;d' /etc/dmrgateway
+# Net5
+ sudo sed -i '/^\[/h;G;/DMR Network 5/s/\(PCRewrite0=\).*/\1'"2,15009999,2,9999,1"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 5/s/\(SrcRewrite0=\).*/\1'"2,15009999,2,$CALL,1"'/m;P;d' /etc/dmrgateway
+# Net 6
+ sudo sed -i '/^\[/h;G;/DMR Network 6/s/\(PCRewrite0=\).*/\1'"2,16009990,2,9990,1"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 6/s/\(SrcRewrite0=\).*/\1'"2,16009990,2,$CALL,1"'/m;P;d' /etc/dmrgateway
+}
+
+function Parrot7()
+{
+# Net1
+ sudo sed -i '/^\[/h;G;/DMR Network 1/s/\(PCRewrite0=\).*/\1'"2,1009990,2,9990,1"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 1/s/\(SrcRewrite0=\).*/\1'"2,1009990,2,$CALL,1"'/m;P;d' /etc/dmrgateway
+# Net4
+ sudo sed -i '/^\[/h;G;/DMR Network 4/s/\(PCRewrite0=\).*/\1'"2,4009990,2,9990,1"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 4/s/\(SrcRewrite0=\).*/\1'"2,4009990,2,$CALL,1"'/m;P;d' /etc/dmrgateway
+# Net5
+ sudo sed -i '/^\[/h;G;/DMR Network 5/s/\(PCRewrite0=\).*/\1'"2,5009999,2,9999,1"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 5/s/\(SrcRewrite0=\).*/\1'"2,5009999,2,$CALL,1"'/m;P;d' /etc/dmrgateway
+# Net 6
+ sudo sed -i '/^\[/h;G;/DMR Network 6/s/\(PCRewrite0=\).*/\1'"2,6009990,2,9990,1"'/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/DMR Network 6/s/\(SrcRewrite0=\).*/\1'"2,6009990,2,$CALL,1"'/m;P;d' /etc/dmrgateway
+}
+
+
 function CopyBin()
 {
 echo "Running CopyBin"
@@ -292,6 +329,7 @@ case $CHOICE in
 		SetNetworks
 		CopyBin
 		GWMode8
+		Parrot8
             ;;
          4)   echo "You Chose to Install DMRGateway - 7 Digit Translation Mode"
 		sudo cp /home/pi-star/DMRGateway-4/DMRGateway.ini /etc/dmrgateway
@@ -299,6 +337,7 @@ case $CHOICE in
 		SetNetworks
 		CopyBin
 		GWMode7
+		Parrot7
             ;;
          5)
             echo "You Chose to Install DMRGateway - No Config File Update"		
