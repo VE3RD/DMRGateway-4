@@ -150,8 +150,6 @@ Id1="$ID""$HS""2"
  sudo sed -i '/^\[/h;G;/DMR Network 2/s/\(SRCRewrite=\).*/\1'"$SRCRW"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 2/s/\(Id=\).*/\1'"$Id1"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 2/s/\(Enabled=\).*/\1'"$ENAB"'/m;P;d' /etc/dmrgateway
- sudo sed -i '/^\[/h;G;/General/s/\(GWMode=\).*/\10/m;P;d' /etc/dmrgateway
- sudo sed -i '/^\[/h;G;/General/s/\(GWMode=\).*/\10/m;P;d' /etc/dmrgateway
 
 #[DMR Network 3]
 Id1="$ID""$HS""3"
@@ -162,7 +160,6 @@ Id1="$ID""$HS""3"
  sudo sed -i '/^\[/h;G;/DMR Network 3/s/\(SRCRewrite=\).*/\1'"$SRCRW"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 3/s/\(Id=\).*/\1'"$Id1"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 3/s/\(Enabled=\).*/\1'"$ENAB"'/m;P;d' /etc/dmrgateway
- sudo sed -i '/^\[/h;G;/General/s/\(GWMode=\).*/\18/m;P;d' /etc/dmrgateway
 
 
 #[DMR Network 4]
@@ -174,7 +171,6 @@ Id1="$ID""$HS""4"
  sudo sed -i '/^\[/h;G;/DMR Network 4/s/\(SRCRewrite=\).*/\1'"$SRCRW"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 4/s/\(Id=\).*/\1'"$Id1"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 4/s/\(Enabled=\).*/\1'"$ENAB"'/m;P;d' /etc/dmrgateway
- sudo sed -i '/^\[/h;G;/General/s/\(GWMode=\).*/\17/m;P;d' /etc/dmrgateway
 
 
 #[DMR Network 5]
@@ -201,6 +197,7 @@ Id1="$ID""$HS""6"
 
 }
 function GWMode0(){
+ sudo sed -i '/^\[/h;G;/General/s/\(GWMode=\).*/\10/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 1/s/\(TGRewrite0=\).*/\1'"2,1,2,1,999999"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 2/s/\(TGRewrite0=\).*/\1'"2,1,2,1,999999"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 3/s/\(TGRewrite0=\).*/\1'"2,1,2,1,999999"'/m;P;d' /etc/dmrgateway
@@ -211,6 +208,7 @@ function GWMode0(){
 }
 
 function GWMode8(){
+ sudo sed -i '/^\[/h;G;/General/s/\(GWMode=\).*/\18/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 1/s/\(TGRewrite0=\).*/\1'"2,11000001,2,1,9999999"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 2/s/\(TGRewrite0=\).*/\1'"2,12000001,2,1,9999999"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 3/s/\(TGRewrite0=\).*/\1'"2,13000001,2,1,9999999"'/m;P;d' /etc/dmrgateway
@@ -220,6 +218,7 @@ function GWMode8(){
 }
 
 function GWMode7(){
+ sudo sed -i '/^\[/h;G;/General/s/\(GWMode=\).*/\17/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 1/s/\(TGRewrite0=\).*/\1'"2,1000001,2,1,999999"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 2/s/\(TGRewrite0=\).*/\1'"2,2000001,2,1,999999"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 3/s/\(TGRewrite0=\).*/\1'"2,3000001,2,1,999999"'/m;P;d' /etc/dmrgateway
