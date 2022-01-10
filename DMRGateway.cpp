@@ -93,10 +93,10 @@ static void sigHandler(int signum)
 }
 #endif
 
-const char* HEADER1 = "This software is for use on amateur radio networks only,";
-const char* HEADER2 = "it is to be used for educational purposes only. Its use on";
-const char* HEADER3 = "commercial networks is strictly prohibited.";
-const char* HEADER4 = "Copyright(C) 2017-2020 by Jonathan Naylor, G4KLX and others";
+const char* HEADER1 = "This software is licenced under the GPL v2 and is primarily";
+const char* HEADER2 = "intended for amateur and educational use.";
+const char* HEADER3 = "Created by Jonathan Naylor, G4KLX and others";
+const char* HEADER4 = "Modified by Phil Thompson VE3RD";
 
 int main(int argc, char** argv)
 {
@@ -2944,12 +2944,17 @@ unsigned int CDMRGateway::getConfig(const std::string& name, unsigned char* buff
 	assert(buffer != NULL);
 
 	float lat = m_conf.getInfoLatitude();
-
+	if ((lat > 90) || (lat < -90))
+		lat = 0;
 	float lon = m_conf.getInfoLongitude();
+	if ((lon > 180) || (lon < -180))
+		lon = 0;
 
 	int height = m_conf.getInfoHeight();
 	if (height > 999)
 		height = 999;
+	else if (height < 0)
+		height = 0;
 
 	std::string location    = m_conf.getInfoLocation();
 	std::string description = m_conf.getInfoDescription();
