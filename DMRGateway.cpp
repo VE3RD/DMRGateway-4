@@ -780,6 +780,7 @@ int CDMRGateway::run()
 
 				PROCESS_RESULT result = RESULT_UNMATCHED;
 
+				ok2tx = true;
 				
                                 if ( dstId == 9000 ) {
                                         storedtg = dstId;
@@ -796,7 +797,7 @@ int CDMRGateway::run()
                                 }
 
 
-                         	if ( dstId >= 9001 && dstId <= 9009){
+				if ( GWMode == 0 && dstId >= 9001 && dstId <= 9009){
                                                 ClearNetworks();
                                                 ClearRFNets();
                                                 storedtg = dstId;
@@ -808,8 +809,8 @@ int CDMRGateway::run()
                                                 ok2tx=false;
                                 }
 
-				if ( GWMode == 7 ){
-                                	if ( dstId > 999999 ) {
+				if ( GWMode == 7 && dstId > 999999 ){
+                            
                                         	ClearNetworks();
                                         	ClearRFNets();
                                         	if ( trace ) LogInfo("Radio TG Keyed = %d",dstId);
@@ -819,11 +820,10 @@ int CDMRGateway::run()
                                         	if (trace) LogInfo("Selected 7x Network = %d",selnet);
                                         	locknet = selnet;
                                         	ok2tx=true;
-                                        }
+                                }
+				
+				if ( GWMode == 8 && dstId > 9999999 ){
 
-				}else{
-
-                                	if ( dstId > 9999999 ) {
                                         	ClearNetworks();
                                         	ClearRFNets();
                                         	if ( trace ) LogInfo("Radio TG Keyed = %d",dstId);
@@ -834,11 +834,9 @@ int CDMRGateway::run()
                                         	if (trace) LogInfo("Selected 8x Network = %d",selnet);
                                         	locknet = selnet;
                                         	ok2tx=true;
-                                        }
 				}
 
 				
-				ok2tx = true;
                                 if ( dstId >= 9000 && dstId <= 9008 ) ok2tx = false;
                            	
 				switch( selnet ) {
