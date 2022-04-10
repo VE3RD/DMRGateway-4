@@ -200,10 +200,10 @@ Id1="$ID""$HS""6"
 
 }
 
-function GWMode0(){
+function GWMode1(){
 sed -i '/TGRewrite1/s/^/#/g' /etc/dmrgateway    ###    (to comment out)
 
- sudo sed -i '/^\[/h;G;/General/s/\(GWMode=\).*/\10/m;P;d' /etc/dmrgateway
+ sudo sed -i '/^\[/h;G;/General/s/\(GWMode=\).*/\11/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 1/s/\(TGRewrite0=\).*/\1'"2,1,2,1,999999"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 2/s/\(TGRewrite0=\).*/\1'"2,1,2,1,999999"'/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 3/s/\(TGRewrite0=\).*/\1'"2,1,2,1,999999"'/m;P;d' /etc/dmrgateway
@@ -348,7 +348,7 @@ case $CHOICE in
 		sudo cp /home/pi-star/DMRGateway-4/DMRGateway.ini /etc/dmrgateway
 		GetSetInfo
 		SetNetworks
-		GWMode0
+		GWMode1
 		CopyBin
             ;;
          3)   echo "You Chose to Install DMRGateway - 8 Digit Translation Mode"
