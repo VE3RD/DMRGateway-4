@@ -797,7 +797,12 @@ int CDMRGateway::run()
 
                                 }
 
-
+                                if ( dstId == 9007 ) {
+					GWMode=7;
+				}
+                                if ( dstId == 9008 ) {
+					GWMode=8;
+				}
 				if ( dstId >= 9001 && dstId <= 9009){
 						GWMode = 1;
                                                 ClearNetworks();
