@@ -787,6 +787,7 @@ int CDMRGateway::run()
                                         ok2tx=false;
                                         selnet=0;
                                         locknet=0;
+					GWMode=0;
                                         if (m_dmrNetwork1 ) net1ok = true;
                                         if (m_dmrNetwork2 ) net2ok = true;
                                         if (m_dmrNetwork3 ) net3ok = true;
@@ -797,7 +798,8 @@ int CDMRGateway::run()
                                 }
 
 
-				if ( GWMode == 0 && dstId >= 9001 && dstId <= 9009){
+				if ( dstId >= 9001 && dstId <= 9009){
+						GWMode = 1;
                                                 ClearNetworks();
                                                 ClearRFNets();
                                                 storedtg = dstId;
@@ -822,8 +824,8 @@ int CDMRGateway::run()
                                         	ok2tx=true;
                                 }
 				
-				if ( GWMode == 8 && dstId > 9999999 ){
-
+				if ( dstId > 9999999 ){
+						GWMode = 8;
                                         	ClearNetworks();
                                         	ClearRFNets();
                                         	if ( trace ) LogInfo("Radio TG Keyed = %d",dstId);
@@ -885,6 +887,7 @@ int CDMRGateway::run()
 	if ( trace ) LogInfo("NET1OK:%s   NET2OK:%s  NET3OK:%s  NET4OK:%s  NET5OK:%s  NET6OK:%s", net1ok ? "yes" : "no ", net2ok ? "yes" : "no ", net3ok ? "yes" : "no ",  net4ok ? "yes" : "no ", net5ok ? "yes" : "no ", net6ok ? "yes" : "no " );
         if ( trace ) LogInfo("Network Locked = %d    OK to TX:%s", locknet, ok2tx ? "Yes" : "No" );
 	if ( trace ) LogInfo("RFRX Net %d Dest: %d From: %d", selnet, dstId, srcId);
+	if ( trace ) LogInfo("Gateway Mode = %d", GWMode);
 
 
 				if (m_network1Enabled && (m_dmrNetwork1 != NULL) && rf1ok && ok2tx) {
@@ -1681,7 +1684,6 @@ bool CDMRGateway::createMMDVM()
 	std::string localAddress = m_conf.getLocalAddress();
 	unsigned short localPort = m_conf.getLocalPort();
 	unsigned short startNet = m_conf.getStartNet();
-//	unsigned short gwMode = m_conf.getGWMode();
 	bool debug               = m_conf.getDebug();
 
 	selnet=startNet;
@@ -1692,7 +1694,6 @@ bool CDMRGateway::createMMDVM()
 	LogInfo("    Local Address: %s", localAddress.c_str());
 	LogInfo("    Local Port: %hu", localPort);
 	LogInfo("    Start Net: %hu", startNet);
-//	LogInfo("    GW Mode: %hu", gwMode);
 
 	m_repeater = new CMMDVMNetwork(rptAddress, rptPort, localAddress, localPort, startNet, debug);
 
