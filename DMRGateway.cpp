@@ -33,8 +33,9 @@
 #include "Sync.h"
 #include "Log.h"
 #include "GitVersion.h"
+#include </home/pi-star/simpleini/SimpleIni.h>  // for ini
 
-#include <cstdio>
+#include <cstdio> 
 #include <vector>
 
 #if !defined(_WIN32) && !defined(_WIN64)
@@ -81,6 +82,9 @@ static int  locknet = 4;
 
 void ClearRFNets();
 void ClearNetworks();
+void SetDMR();
+
+ unsigned short int GWMode = 8; 
 
 static bool m_killed = false;
 static int  m_signal = 0;
@@ -434,7 +438,7 @@ int CDMRGateway::run()
 
 //////////////
  unsigned short int StartNet = m_conf.getStartNet(); 
- unsigned short int GWMode = m_conf.getGWMode(); 
+ GWMode = m_conf.getGWMode(); 
 	
 	selnet = StartNet;
 
@@ -797,14 +801,25 @@ int CDMRGateway::run()
 
                                 }
 
-                                if ( dstId == 9007 ) {
-					GWMode=7;
+                                if ( dstId == 9007) {
+                                        ok2tx=false;
+					if ( GWMode != 7) 
+					{
+						GWMode=7;
+						SetDMR();
+					}
+//					system("/home/pi-star/DMRGateway-4/setgwmode.sh 7");
 				}
-                                if ( dstId == 9008 ) {
-					GWMode=8;
+                                if ( dstId == 9008) {
+                                        ok2tx=false;
+				//	system("/home/pi-star/DMRGateway-4/setgwmode.sh 8");
+					if ( GWMode != 8) 
+					{
+						GWMode=8;
+						SetDMR();
+					}
 				}
-				if ( dstId >= 9001 && dstId <= 9009){
-						GWMode = 1;
+				if ( dstId >= 9001 && dstId <= 9006){
                                                 ClearNetworks();
                                                 ClearRFNets();
                                                 storedtg = dstId;
@@ -814,6 +829,11 @@ int CDMRGateway::run()
                                                 locknet = selnet;
                                                 if ( trace && ok2tx ) LogInfo("Network Locked = %d",selnet);
                                                 ok2tx=false;
+//					 if ( GWMode != 1 ) system("/home/pi-star/DMRGateway-4/setgwmode.sh 1");
+					 if ( GWMode != 1 ) {
+						GWMode = 1;
+						SetDMR();
+					}
                                 }
 
 				if ( GWMode == 7 && dstId > 999999 ){
@@ -3209,4 +3229,114 @@ rf4ok=false;
 rf5ok=false;
 rf6ok=false;
 }
+
+void SetDMR()
+{
+//	system("/bin/bash /usr/local/sbin/dmrgateway.service stop");
+	execl("/usr/local/sbin/dmrgateway.service" "stop","");
+        CSimpleIniA ini;
+        ini.SetUnicode();
+        SI_Error rc = ini.LoadFile("/etc/dmrgateway");
+
+   if (GWMode == 8) 
+   {
+        rc = ini.SetValue("General", "GWMode", "8");
+        rc = ini.SetValue("DMR Network 1", "TGRewrite0", "2,11000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 1", "PCRewrite0", "2,11000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 2", "TGRewrite0", "2,12000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 2", "PCRewrite0", "2,12000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 3", "TGRewrite0", "2,13000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 3", "PCRewrite0", "2,13000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 4", "TGRewrite0", "2,14000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 4", "PCRewrite0", "2,14000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 5", "TGRewrite0", "2,15000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 5", "PCRewrite0", "2,15000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 6", "TGRewrite0", "2,16000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 6", "PCRewrite0", "2,16000001,2,1,999999");
+
+        if (rc < 0) {
+                LogInfo("Setting DMR Mode 8 Failed.....");
+        }else{
+                LogInfo("Setting DMR Mode 8 Completed - Saving Changes");
+                rc = ini.SaveFile("/etc/dmrgateway");
+                if (rc < 0) {
+                        LogInfo("Saving DMR Mode 8 Failed.....");
+                }
+        }
+
+//      ASSERT_EQ(rc, SI_UPDATED);
+   }
+
+   if (GWMode == 7) 
+    {
+        rc = ini.SetValue("General", "GWMode", "7");
+        rc = ini.SetValue("DMR Network 1", "TGRewrite0", "2,1000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 1", "PCRewrite0", "2,1000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 2", "TGRewrite0", "2,2000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 2", "PCRewrite0", "2,2000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 3", "TGRewrite0", "2,3000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 3", "PCRewrite0", "2,3000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 4", "TGRewrite0", "2,4000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 4", "PCRewrite0", "2,4000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 5", "TGRewrite0", "2,5000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 5", "PCRewrite0", "2,5000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 6", "TGRewrite0", "2,6000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 6", "PCRewrite0", "2,6000001,2,1,999999");
+
+        if (rc < 0) {
+                LogInfo("Setting DMR Mode 7 Failed.....");
+        }else{
+                LogInfo("Setting DMR Mode 7 Completed - Saving Changes");
+                rc = ini.SaveFile("/etc/dmrgateway");
+                if (rc < 0) {
+                        LogInfo("Saving DMR Mode 7 Failed.....");
+                }
+	}
+   }
+  if (GWMode == 1)
+    {
+        rc = ini.SetValue("General", "GWMode", "1");
+
+        rc = ini.SetValue("DMR Network 1", "TGRewrite0", "2,1,2,1,9999999");
+        rc = ini.SetValue("DMR Network 1", "PCRewrite0", "2,1,2,1,9999999");
+//                rc = ini.SaveFile("/etc/dmrgateway");
+        rc = ini.SetValue("DMR Network 2", "TGRewrite0", "2,1,2,1,9999999");
+        rc = ini.SetValue("DMR Network 2", "PCRewrite0", "2,1,2,1,9999999");
+//                rc = ini.SaveFile("/etc/dmrgateway");
+        rc = ini.SetValue("DMR Network 3", "TGRewrite0", "2,1,2,1,9999999");
+        rc = ini.SetValue("DMR Network 3", "PCRewrite0", "2,1,2,1,9999999");
+//                rc = ini.SaveFile("/etc/dmrgateway");
+        rc = ini.SetValue("DMR Network 4", "TGRewrite0", "2,1,2,1,9999999");
+        rc = ini.SetValue("DMR Network 4", "PCRewrite0", "2,1,2,1,9999999");
+ //               rc = ini.SaveFile("/etc/dmrgateway");
+        rc = ini.SetValue("DMR Network 5", "TGRewrite0", "2,1,2,1,9999999");
+        rc = ini.SetValue("DMR Network 5", "PCRewrite0", "2,1,2,1,9999999");
+//                rc = ini.SaveFile("/etc/dmrgateway");
+        rc = ini.SetValue("DMR Network 6", "TGRewrite0", "2,1,2,1,9999999");
+        rc = ini.SetValue("DMR Network 6", "PCRewrite0", "2,1,2,1,9999999");
+
+        if (rc < 0) {
+                LogInfo("Setting DMR Mode 1 Failed.....");
+        }else{
+                LogInfo("Setting DMR Mode 1 Completed - Saving Changes");
+                rc = ini.SaveFile("/etc/dmrgateway");
+                if (rc < 0) {
+                        LogInfo("Saving DMR Mode 1 Failed.....");
+                }
+        }
+   }
+//	sleep(3);
+//	system("/bin/bash /usr/local/sbin/dmrgateway.service start");
+	execl("/usr/local/sbin/dmrgateway.service","restart","");
+
+}
+
+
+
+
+
+
+
+
+
 
