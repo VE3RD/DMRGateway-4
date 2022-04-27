@@ -33,7 +33,7 @@
 #include "Sync.h"
 #include "Log.h"
 #include "GitVersion.h"
-#include </home/pi-star/simpleini/SimpleIni.h>  // for ini
+#include "./SimpleIni.h"  // for ini
 
 #include <cstdio> 
 #include <vector>
