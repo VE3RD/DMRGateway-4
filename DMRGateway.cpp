@@ -83,6 +83,8 @@ static int  locknet = 4;
 void ClearRFNets();
 void ClearNetworks();
 void SetDMR();
+void ReStart();
+int Reload();
 
  unsigned short int GWMode = 8; 
 
@@ -807,6 +809,7 @@ int CDMRGateway::run()
 					{
 						GWMode=7;
 						SetDMR();
+						LogInfo(" Returned from SetDMR-7");
 					}
 //					system("/home/pi-star/DMRGateway-4/setgwmode.sh 7");
 				}
@@ -817,6 +820,7 @@ int CDMRGateway::run()
 					{
 						GWMode=8;
 						SetDMR();
+						LogInfo(" Returned from SetDMR-8");
 					}
 				}
 				if ( dstId >= 9001 && dstId <= 9006){
@@ -850,7 +854,6 @@ int CDMRGateway::run()
                                 }
 				
 				if ( dstId > 9999999 ){
-						GWMode = 8;
                                         	ClearNetworks();
                                         	ClearRFNets();
                                         	if ( trace ) LogInfo("Radio TG Keyed = %d",dstId);
@@ -861,6 +864,11 @@ int CDMRGateway::run()
                                         	if (trace) LogInfo("Selected 8x Network = %d",selnet);
                                         	locknet = selnet;
                                         	ok2tx=true;
+			
+						 if ( GWMode != 8 ) {
+							GWMode = 8;
+							SetDMR();
+						}
 				}
 
 				
@@ -2747,18 +2755,6 @@ bool CDMRGateway::createDMRNetwork6()
 	return true;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 bool CDMRGateway::createXLXNetwork()
 {
 	std::string fileName    = m_conf.getXLXNetworkFile();
@@ -3230,10 +3226,74 @@ rf5ok=false;
 rf6ok=false;
 }
 
+int Reload()
+{
+const char* iniFile = "/etc/dmrgateway";
+
+        int ret = 0;
+
+        do {
+                m_signal = 0;
+
+                CDMRGateway* host = new CDMRGateway(std::string(iniFile));
+                ret = host->run();
+
+                delete host;
+
+                if (m_signal == 2)
+                        ::LogInfo("DMRGateway-%s exited on receipt of SIGINT", VERSION);
+
+                if (m_signal == 15)
+                        ::LogInfo("DMRGateway-%s exited on receipt of SIGTERM", VERSION);
+
+                if (m_signal == 1)
+                        ::LogInfo("DMRGateway-%s restarted on receipt of SIGHUP", VERSION);
+        } while (m_signal == 1);
+
+        ::LogFinalise();
+
+        return ret;
+
+
+}
+void ReStart()
+{
+
+//	system("/bin/bash /usr/local/sbin/dmrgateway.service stop");
+//	execl("/usr/local/sbin/dmrgateway.service" "stop","");
+	sleep(3);
+	seteuid (0);
+	
+	SI_Error rc = 0;
+
+	rc=execl("sudo /usr/local/sbin/dmrgateway.service restart","restart",NULL);
+	rc=execl("sudo","/usr/local/sbin/dmrgateway.service","restart");
+	rc=execl("sudo","systemctl","restart","/usr/local/sbin/dmrgateway.service");
+	rc=system("sudo /usr/local/sbin/dmrgateway.service restart");
+	rc=system("sudo reboot");
+	rc=system("sudo /home/pi-star/reboot.sh");
+	rc=system("sudo /home/pi-star/reboot.sh");
+	rc=execl("sudo","/home/pi-star/reboot.sh",NULL);
+	rc=execl("sudo /home/pi-star/reboot.sh","",NULL);
+	rc=execl("sudo","/home/pi-star/reboot.sh",NULL);
+	rc=system("sudo killall DMRGateway");
+	rc=execl("sudo","killall DMRGateway",NULL);
+	execl("seteuid (0)","reboot", NULL);
+	execl("seteuid (0)","bin/bash","reboot");	
+	execl("seteuid (0)","bin/bash","sudo /usr/local/sbin/dmrgateway.service restart");
+	system("/bin/bash -c reboot");
+	execl("/bin/bash"," -c", "sudo /usr/local/sbin/dmrgateway.service restart");		
+	seteuid (0);
+        system("/bin/bash -c 'sudo reboot'");
+
+
+}
+
 void SetDMR()
 {
-//	system("/bin/bash /usr/local/sbin/dmrgateway.service stop");
-	execl("/usr/local/sbin/dmrgateway.service" "stop","");
+	setgid (0);
+	setuid (0);
+
         CSimpleIniA ini;
         ini.SetUnicode();
         SI_Error rc = ini.LoadFile("/etc/dmrgateway");
@@ -3258,7 +3318,8 @@ void SetDMR()
                 LogInfo("Setting DMR Mode 8 Failed.....");
         }else{
                 LogInfo("Setting DMR Mode 8 Completed - Saving Changes");
-                rc = ini.SaveFile("/etc/dmrgateway");
+                seteuid (0);
+		rc = ini.SaveFile("/etc/dmrgateway");
                 if (rc < 0) {
                         LogInfo("Saving DMR Mode 8 Failed.....");
                 }
@@ -3287,6 +3348,7 @@ void SetDMR()
                 LogInfo("Setting DMR Mode 7 Failed.....");
         }else{
                 LogInfo("Setting DMR Mode 7 Completed - Saving Changes");
+		seteuid (0);
                 rc = ini.SaveFile("/etc/dmrgateway");
                 if (rc < 0) {
                         LogInfo("Saving DMR Mode 7 Failed.....");
@@ -3299,19 +3361,14 @@ void SetDMR()
 
         rc = ini.SetValue("DMR Network 1", "TGRewrite0", "2,1,2,1,9999999");
         rc = ini.SetValue("DMR Network 1", "PCRewrite0", "2,1,2,1,9999999");
-//                rc = ini.SaveFile("/etc/dmrgateway");
         rc = ini.SetValue("DMR Network 2", "TGRewrite0", "2,1,2,1,9999999");
         rc = ini.SetValue("DMR Network 2", "PCRewrite0", "2,1,2,1,9999999");
-//                rc = ini.SaveFile("/etc/dmrgateway");
         rc = ini.SetValue("DMR Network 3", "TGRewrite0", "2,1,2,1,9999999");
         rc = ini.SetValue("DMR Network 3", "PCRewrite0", "2,1,2,1,9999999");
-//                rc = ini.SaveFile("/etc/dmrgateway");
         rc = ini.SetValue("DMR Network 4", "TGRewrite0", "2,1,2,1,9999999");
         rc = ini.SetValue("DMR Network 4", "PCRewrite0", "2,1,2,1,9999999");
- //               rc = ini.SaveFile("/etc/dmrgateway");
         rc = ini.SetValue("DMR Network 5", "TGRewrite0", "2,1,2,1,9999999");
         rc = ini.SetValue("DMR Network 5", "PCRewrite0", "2,1,2,1,9999999");
-//                rc = ini.SaveFile("/etc/dmrgateway");
         rc = ini.SetValue("DMR Network 6", "TGRewrite0", "2,1,2,1,9999999");
         rc = ini.SetValue("DMR Network 6", "PCRewrite0", "2,1,2,1,9999999");
 
@@ -3319,16 +3376,14 @@ void SetDMR()
                 LogInfo("Setting DMR Mode 1 Failed.....");
         }else{
                 LogInfo("Setting DMR Mode 1 Completed - Saving Changes");
+		seteuid (0);
                 rc = ini.SaveFile("/etc/dmrgateway");
                 if (rc < 0) {
                         LogInfo("Saving DMR Mode 1 Failed.....");
                 }
         }
    }
-//	sleep(3);
-//	system("/bin/bash /usr/local/sbin/dmrgateway.service start");
-	execl("/usr/local/sbin/dmrgateway.service","restart","");
-
+Reload();
 }
 
 
