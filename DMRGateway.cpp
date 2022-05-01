@@ -838,7 +838,7 @@ int CDMRGateway::run()
 						SetDMR();
 					}
                                 }
-
+				// 7 Digit Mode
 				if ( GWMode == 7 && dstId > 999999 ){
                             
                                         	ClearNetworks();
@@ -910,6 +910,13 @@ int CDMRGateway::run()
                                                                  rf6ok=true;
                                                                 net6ok=true;
                                                                 break;
+                                                        }
+                                                case 7 : if ( m_dmrNetwork3 != NULL )
+                                                        {
+                                                                 rf3ok=true;
+                                                                net3ok=true;
+                                        			locknet=3;  
+					                      break;
                                                         }
 
                                         }

@@ -13,7 +13,7 @@ CALL=$(sed -nr "/^\[General\]/ { :l /^Callsign[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b
 
 ## Raw Mode
 function GWMode1(){
-sudo sed -i '/TGRewrite1/s/^/#/g' /etc/dmrgateway    ###    (to comment out)
+#sudo sed -i '/TGRewrite1/s/^/#/g' /etc/dmrgateway    ###    (to comment out)
 
  sudo sed -i '/^\[/h;G;/General/s/\(GWMode=\).*/\11/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 1/s/\(TGRewrite0=\).*/\1'"2,1,2,1,999999"'/m;P;d' /etc/dmrgateway
@@ -42,7 +42,7 @@ sudo sed -i '/TGRewrite1/s/^/#/g' /etc/dmrgateway    ###    (to comment out)
 
 ## 8 Digit Mode
 function GWMode8(){
- sudo sed -i '/TGRewrite1/s/^#//g' /etc/dmrgateway     ###    (to uncomment)
+ #sudo sed -i '/TGRewrite1/s/^#//g' /etc/dmrgateway     ###    (to uncomment)
 
  sudo sed -i '/^\[/h;G;/General/s/\(GWMode=\).*/\18/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 1/s/\(TGRewrite0=\).*/\1'"2,11000001,2,1,999999"'/m;P;d' /etc/dmrgateway
@@ -84,7 +84,7 @@ function GWMode8(){
 
 
 function GWMode7(){
-sudo sed -i '/TGRewrite1/s/^/#/g' /etc/dmrgateway    ###    (to comment out)
+#sudo sed -i '/TGRewrite1/s/^/#/g' /etc/dmrgateway    ###    (to comment out)
 
  sudo sed -i '/^\[/h;G;/General/s/\(GWMode=\).*/\17/m;P;d' /etc/dmrgateway
  sudo sed -i '/^\[/h;G;/DMR Network 1/s/\(TGRewrite0=\).*/\1'"2,1000001,2,1,999999"'/m;P;d' /etc/dmrgateway
