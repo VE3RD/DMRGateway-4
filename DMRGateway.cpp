@@ -83,7 +83,6 @@ static int  locknet = 4;
 void ClearRFNets();
 void ClearNetworks();
 void SetDMR();
-void ReStart();
 int Reload();
 
  unsigned short int GWMode = 8; 
@@ -3256,38 +3255,6 @@ const char* iniFile = "/etc/dmrgateway";
 
 
 }
-void ReStart()
-{
-
-//	system("/bin/bash /usr/local/sbin/dmrgateway.service stop");
-//	execl("/usr/local/sbin/dmrgateway.service" "stop","");
-	sleep(3);
-	seteuid (0);
-	
-	SI_Error rc = 0;
-
-	rc=execl("sudo /usr/local/sbin/dmrgateway.service restart","restart",NULL);
-	rc=execl("sudo","/usr/local/sbin/dmrgateway.service","restart");
-	rc=execl("sudo","systemctl","restart","/usr/local/sbin/dmrgateway.service");
-	rc=system("sudo /usr/local/sbin/dmrgateway.service restart");
-	rc=system("sudo reboot");
-	rc=system("sudo /home/pi-star/reboot.sh");
-	rc=system("sudo /home/pi-star/reboot.sh");
-	rc=execl("sudo","/home/pi-star/reboot.sh",NULL);
-	rc=execl("sudo /home/pi-star/reboot.sh","",NULL);
-	rc=execl("sudo","/home/pi-star/reboot.sh",NULL);
-	rc=system("sudo killall DMRGateway");
-	rc=execl("sudo","killall DMRGateway",NULL);
-	execl("seteuid (0)","reboot", NULL);
-	execl("seteuid (0)","bin/bash","reboot");	
-	execl("seteuid (0)","bin/bash","sudo /usr/local/sbin/dmrgateway.service restart");
-	system("/bin/bash -c reboot");
-	execl("/bin/bash"," -c", "sudo /usr/local/sbin/dmrgateway.service restart");		
-	seteuid (0);
-        system("/bin/bash -c 'sudo reboot'");
-
-
-}
 
 void SetDMR()
 {
@@ -3340,16 +3307,22 @@ void SetDMR()
     {
         rc = ini.SetValue("General", "GWMode", "7");
         rc = ini.SetValue("DMR Network 1", "TGRewrite0", "2,1000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 1", "TGRewrite1", "2,1000001,2,1,999999");
         rc = ini.SetValue("DMR Network 1", "PCRewrite0", "2,1000001,2,1,999999");
         rc = ini.SetValue("DMR Network 2", "TGRewrite0", "2,2000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 2", "TGRewrite1", "2,2000001,2,1,999999");
         rc = ini.SetValue("DMR Network 2", "PCRewrite0", "2,2000001,2,1,999999");
         rc = ini.SetValue("DMR Network 3", "TGRewrite0", "2,3000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 3", "TGRewrite1", "2,3000001,2,1,999999");
         rc = ini.SetValue("DMR Network 3", "PCRewrite0", "2,3000001,2,1,999999");
         rc = ini.SetValue("DMR Network 4", "TGRewrite0", "2,4000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 4", "TGRewrite1", "2,4000001,2,1,999999");
         rc = ini.SetValue("DMR Network 4", "PCRewrite0", "2,4000001,2,1,999999");
         rc = ini.SetValue("DMR Network 5", "TGRewrite0", "2,5000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 5", "TGRewrite1", "2,5000001,2,1,999999");
         rc = ini.SetValue("DMR Network 5", "PCRewrite0", "2,5000001,2,1,999999");
         rc = ini.SetValue("DMR Network 6", "TGRewrite0", "2,6000001,2,1,999999");
+        rc = ini.SetValue("DMR Network 6", "TGRewrite1", "2,6000001,2,1,999999");
         rc = ini.SetValue("DMR Network 6", "PCRewrite0", "2,6000001,2,1,999999");
 
         if (rc < 0) {
@@ -3368,16 +3341,22 @@ void SetDMR()
         rc = ini.SetValue("General", "GWMode", "1");
 
         rc = ini.SetValue("DMR Network 1", "TGRewrite0", "2,1,2,1,9999999");
+        rc = ini.SetValue("DMR Network 1", "TGRewrite1", "2,1,2,1,9999999");
         rc = ini.SetValue("DMR Network 1", "PCRewrite0", "2,1,2,1,9999999");
         rc = ini.SetValue("DMR Network 2", "TGRewrite0", "2,1,2,1,9999999");
+        rc = ini.SetValue("DMR Network 2", "TGRewrite1", "2,1,2,1,9999999");
         rc = ini.SetValue("DMR Network 2", "PCRewrite0", "2,1,2,1,9999999");
         rc = ini.SetValue("DMR Network 3", "TGRewrite0", "2,1,2,1,9999999");
+        rc = ini.SetValue("DMR Network 3", "TGRewrite1", "2,1,2,1,9999999");
         rc = ini.SetValue("DMR Network 3", "PCRewrite0", "2,1,2,1,9999999");
         rc = ini.SetValue("DMR Network 4", "TGRewrite0", "2,1,2,1,9999999");
+        rc = ini.SetValue("DMR Network 4", "TGRewrite1", "2,1,2,1,9999999");
         rc = ini.SetValue("DMR Network 4", "PCRewrite0", "2,1,2,1,9999999");
         rc = ini.SetValue("DMR Network 5", "TGRewrite0", "2,1,2,1,9999999");
+        rc = ini.SetValue("DMR Network 5", "TGRewrite1", "2,1,2,1,9999999");
         rc = ini.SetValue("DMR Network 5", "PCRewrite0", "2,1,2,1,9999999");
         rc = ini.SetValue("DMR Network 6", "TGRewrite0", "2,1,2,1,9999999");
+        rc = ini.SetValue("DMR Network 6", "TGRewrite1", "2,1,2,1,9999999");
         rc = ini.SetValue("DMR Network 6", "PCRewrite0", "2,1,2,1,9999999");
 
         if (rc < 0) {
