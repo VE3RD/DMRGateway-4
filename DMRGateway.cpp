@@ -3314,6 +3314,14 @@ void SetDMR()
         rc = ini.SetValue("DMR Network 6", "TGRewrite0", "2,16000001,2,1,999999");
         rc = ini.SetValue("DMR Network 6", "PCRewrite0", "2,16000001,2,1,999999");
 
+        rc = ini.SetValue("DMR Network 1", "TGRewrite1", "2,1000001,2,1000001,5599999");
+        rc = ini.SetValue("DMR Network 2", "TGRewrite1", "2,1000001,2,1000001,5599999");
+        rc = ini.SetValue("DMR Network 3", "TGRewrite1", "2,1000001,2,1000001,5599999");
+        rc = ini.SetValue("DMR Network 4", "TGRewrite1", "2,1000001,2,1000001,5599999");
+        rc = ini.SetValue("DMR Network 5", "TGRewrite1", "2,1000001,2,1000001,5599999");
+        rc = ini.SetValue("DMR Network 6", "TGRewrite1", "2,1000001,2,1000001,5599999");
+
+
         if (rc < 0) {
                 LogInfo("Setting DMR Mode 8 Failed.....");
         }else{
