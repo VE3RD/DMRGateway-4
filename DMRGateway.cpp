@@ -38,6 +38,10 @@
 #include <cstdio> 
 #include <vector>
 
+#include <stdio.h>
+#include <stdlib.h>
+
+
 #if !defined(_WIN32) && !defined(_WIN64)
 #include <sys/types.h>
 #include <unistd.h>
@@ -793,13 +797,6 @@ int CDMRGateway::run()
                                         selnet=0;
                                         locknet=0;
 					GWMode=0;
-                                        if (m_dmrNetwork1 ) net1ok = true;
-                                        if (m_dmrNetwork2 ) net2ok = true;
-                                        if (m_dmrNetwork3 ) net3ok = true;
-                                        if (m_dmrNetwork4 ) net4ok = true;
-                                        if (m_dmrNetwork5 ) net5ok = true;
-                                        if (m_dmrNetwork6 ) net6ok = true;
-
                                 }
 
                                 if ( dstId == 9007) {
@@ -808,17 +805,17 @@ int CDMRGateway::run()
 					{
 						GWMode=7;
 						SetDMR();
+				//		system("sudo /home/pi-star/DMRGateway-4/setgwmode.sh 7");
 						LogInfo(" Returned from SetDMR-7");
 					}
-//					system("/home/pi-star/DMRGateway-4/setgwmode.sh 7");
 				}
-                                if ( dstId == 9008) {
+                                if ( dstId == 9008 ) {
                                         ok2tx=false;
-				//	system("/home/pi-star/DMRGateway-4/setgwmode.sh 8");
 					if ( GWMode != 8) 
 					{
 						GWMode=8;
 						SetDMR();
+			//			system("sudo /home/pi-star/DMRGateway-4/setgwmode.sh 8");
 						LogInfo(" Returned from SetDMR-8");
 					}
 				}
@@ -836,10 +833,11 @@ int CDMRGateway::run()
 					 if ( GWMode != 1 ) {
 						GWMode = 1;
 						SetDMR();
+	//					system("/home/pi-star/DMRGateway-4/setgwmode.sh 1");
 					}
                                 }
 				// 7 Digit Mode
-				if ( GWMode == 7 && dstId > 999999 ){
+				if ( GWMode == 7 && dstId > 999999){
                             
                                         	ClearNetworks();
                                         	ClearRFNets();
@@ -866,14 +864,37 @@ int CDMRGateway::run()
 			
 						 if ( GWMode != 8 ) {
 							GWMode = 8;
+		//					system("/home/pi-star/DMRGateway-4/setgwmode.sh 8");
+
 							SetDMR();
 						}
 				}
 
 				
                                 if ( dstId >= 9000 && dstId <= 9008 ) ok2tx = false;
+
+				if ( GWMode == 0 ) {
+                                        if (m_dmrNetwork1 ) net1ok = true;
+                                        if (m_dmrNetwork2 ) net2ok = true;
+                                        if (m_dmrNetwork3 ) net3ok = true;
+                                        if (m_dmrNetwork4 ) net4ok = true;
+                                        if (m_dmrNetwork5 ) net5ok = true;
+                                        if (m_dmrNetwork6 ) net6ok = true;
+					ok2tx = true;
+				}
+
                            	
 				switch( selnet ) {
+                                                case 0 :{ 
+                                                        
+                                        			if (m_dmrNetwork1 ) rf1ok = true;
+                                        			if (m_dmrNetwork2 ) rf2ok = true;
+                                        			if (m_dmrNetwork3 ) rf3ok = true;
+                                        			if (m_dmrNetwork4 ) rf4ok = true;
+                                        			if (m_dmrNetwork5 ) rf5ok = true;
+                                        			if (m_dmrNetwork6 ) rf6ok = true;
+                                                        }
+
                                                 case 1 : if ( m_dmrNetwork1 != NULL )
                                                         {
                                                                  rf1ok=true;
@@ -3213,6 +3234,7 @@ void CDMRGateway::buildNetworkStatusNetworkString(std::string &str, const std::s
 	str += name + ":"+ (((network == NULL) || (enabled == false)) ? "n/a" : (network->isConnected() ? "conn" : "disc"));
 }
 
+
 void ClearNetworks()
 {
 net1ok=false;
@@ -3263,6 +3285,20 @@ const char* iniFile = "/etc/dmrgateway";
 
 }
 
+void ReadWrite(){
+//execv( "mount -o rw,remount,rw","/system",NULL);
+//char* argv[] = {"/bin/my", "command", "here", NULL};
+//sudo mount -o remount,rw /
+//char* argv[] = {"sudo mount -o remount,rw", NULL, NULL};
+
+//char* cmd[] = { "sleep", "1", NULL };
+//execvp(argv[0], argv);
+execvp("sudo mount -o remount,rw /", NULL);
+//execv( "mount","-o","rw","remount","rw", "/system", NULL);
+}
+
+
+
 void SetDMR()
 {
 	setgid (0);
@@ -3300,7 +3336,10 @@ void SetDMR()
                 LogInfo("Setting DMR Mode 8 Failed.....");
         }else{
                 LogInfo("Setting DMR Mode 8 Completed - Saving Changes");
-                seteuid (0);
+         
+ 		seteuid (0);
+		system("sudo mount -o remount,rw /");
+
 		rc = ini.SaveFile("/etc/dmrgateway");
                 if (rc < 0) {
                         LogInfo("Saving DMR Mode 8 Failed.....");
@@ -3337,9 +3376,17 @@ void SetDMR()
         }else{
                 LogInfo("Setting DMR Mode 7 Completed - Saving Changes");
 		seteuid (0);
+		system("sudo mount -o remount,rw /");
                 rc = ini.SaveFile("/etc/dmrgateway");
                 if (rc < 0) {
                         LogInfo("Saving DMR Mode 7 Failed.....");
+
+
+
+
+
+
+
                 }
 	}
    }
@@ -3371,15 +3418,15 @@ void SetDMR()
         }else{
                 LogInfo("Setting DMR Mode 1 Completed - Saving Changes");
 		seteuid (0);
+		system("sudo mount -o remount,rw /");
                 rc = ini.SaveFile("/etc/dmrgateway");
-                if (rc < 0) {
+               if (rc < 0) {
                         LogInfo("Saving DMR Mode 1 Failed.....");
                 }
         }
    }
 Reload();
 }
-
 
 
 
