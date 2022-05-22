@@ -15,6 +15,8 @@
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+#include <unistd.h>
+//#include <sys/types.h>
 
 #include "RewriteType.h"
 #include "DMRSlotType.h"
@@ -40,6 +42,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/wait.h>
+
+#include <fstream>
+#include<iostream>
+
 
 
 #if !defined(_WIN32) && !defined(_WIN64)
@@ -55,6 +62,7 @@ const char* DEFAULT_INI_FILE = "DMRGateway.ini";
 #else
 const char* DEFAULT_INI_FILE = "/etc/DMRGateway.ini";
 #endif
+
 
 const unsigned int XLX_SLOT = 2U;
 const unsigned int XLX_TG   = 9U;
@@ -88,6 +96,8 @@ void ClearRFNets();
 void ClearNetworks();
 void SetDMR();
 int Reload();
+void SetUserMMDVM();
+void SetUserRoot();
 
  unsigned short int GWMode = 8; 
 
@@ -110,6 +120,7 @@ const char* HEADER4 = "Modified by Phil Thompson VE3RD";
 int main(int argc, char** argv)
 {
 	const char* iniFile = DEFAULT_INI_FILE;
+
 
 	if (argc > 1) {
 		for (int currentArg = 1; currentArg < argc; ++currentArg) {
@@ -134,8 +145,10 @@ int main(int argc, char** argv)
 
 	int ret = 0;
 
+
 	do {
 		m_signal = 0;
+	
 
 		CDMRGateway* host = new CDMRGateway(std::string(iniFile));
 		ret = host->run();
@@ -150,9 +163,11 @@ int main(int argc, char** argv)
 
 		if (m_signal == 1)
 			::LogInfo("DMRGateway-%s restarted on receipt of SIGHUP", VERSION);
+
 	} while (m_signal == 1);
 
 	::LogFinalise();
+
 
 	return ret;
 }
@@ -322,8 +337,78 @@ CDMRGateway::~CDMRGateway()
 	CUDPSocket::shutdown();
 }
 
+void SetUserRoot()
+{
+		// If we are currently root...
+////		if (getuid() == 0) {
+			struct passwd* user = ::getpwnam("root");
+			if (user == NULL) {
+				::fprintf(stderr, "Could not det root user");
+				LogInfo("Could not get the root user\n");
+			}
+			
+			uid_t root_uid = user->pw_uid;
+			gid_t root_gid = user->pw_gid;
+	
+
+			// Set user and group ID's to mmdvm:mmdvm
+			if (setgid(root_gid) != 0) {
+				::fprintf(stderr, "Could not set root GID");
+				LogInfo("Could not set root GID");
+			}
+
+			if (setuid(root_uid) != 0) {
+				::fprintf(stderr, "Could not set root UID\n");
+				LogInfo("Could not set root UID\n");
+			}
+
+	    
+////		}
+
+
+}
+
+void SetUserMMDVM()
+{
+		// If we are currently root...
+		if (getuid() == 0) {
+			struct passwd* user = ::getpwnam("mmdvm");
+			if (user == NULL) {
+				::fprintf(stderr, "Could not get the mmdvm user\n");
+				LogInfo("Could not get the mmdvm user\n");
+			}
+			
+			uid_t mmdvm_uid = user->pw_uid;
+			gid_t mmdvm_gid = user->pw_gid;
+	
+
+			// Set user and group ID's to mmdvm:mmdvm
+			if (setgid(mmdvm_gid) != 0) {
+				::fprintf(stderr, "Could not set mmdvm GID\n");
+				LogInfo("Could not set mmdvm GID\n");
+			}
+
+			if (setuid(mmdvm_uid) != 0) {
+				::fprintf(stderr, "Could not set mmdvm UID\n");
+				LogInfo("Could not set mmdvm UID\n");
+			}
+
+	    
+			// Double check it worked (AKA Paranoia) 
+			if (setuid(0) != -1) {
+				::fprintf(stderr, "It's possible to regain root - something is wrong!\n");
+				LogInfo("It's possible to regain root - something is wrong!\n");
+			}
+		}
+
+
+
+
+}
+
 int CDMRGateway::run()
 {
+
 	bool ret = m_conf.read();
 	if (!ret) {
 		::fprintf(stderr, "DMRGateway: cannot read the .ini file\n");
@@ -333,6 +418,8 @@ int CDMRGateway::run()
 #if !defined(_WIN32) && !defined(_WIN64)
 	bool m_daemon = m_conf.getDaemon();
 	if (m_daemon) {
+
+
 		// Create new process
 		pid_t pid = ::fork();
 		if (pid == -1) {
@@ -354,34 +441,39 @@ int CDMRGateway::run()
 			return -1;
 		}
 
+	SetUserMMDVM();
+
 		// If we are currently root...
-		if (getuid() == 0) {
-			struct passwd* user = ::getpwnam("mmdvm");
-			if (user == NULL) {
-				::fprintf(stderr, "Could not get the mmdvm user, exiting\n");
-				return -1;
-			}
+////		if (getuid() == 0) {
+//			struct passwd* user = ::getpwnam("mmdvm");
+//			if (user == NULL) {
+//				::fprintf(stderr, "Could not get the mmdvm user, exiting\n");
+//				return -1;
+//			}
 			
-			uid_t mmdvm_uid = user->pw_uid;
-			gid_t mmdvm_gid = user->pw_gid;
+//			uid_t mmdvm_uid = user->pw_uid;
+//			gid_t mmdvm_gid = user->pw_gid;
+	
 
 			// Set user and group ID's to mmdvm:mmdvm
-			if (setgid(mmdvm_gid) != 0) {
-				::fprintf(stderr, "Could not set mmdvm GID, exiting\n");
-				return -1;
-			}
+//			if (setgid(mmdvm_gid) != 0) {
+//				::fprintf(stderr, "Could not set mmdvm GID, exiting\n");
+//				return -1;
+//			}
 
-			if (setuid(mmdvm_uid) != 0) {
-				::fprintf(stderr, "Could not set mmdvm UID, exiting\n");
-				return -1;
-			}
-		    
+//			if (setuid(mmdvm_uid) != 0) {
+//				::fprintf(stderr, "Could not set mmdvm UID, exiting\n");
+//				return -1;
+//			}
+
+	    
 			// Double check it worked (AKA Paranoia) 
-			if (setuid(0) != -1) {
-				::fprintf(stderr, "It's possible to regain root - something is wrong!, exiting\n");
-				return -1;
-			}
-		}
+//			if (setuid(0) != -1) {
+//				::fprintf(stderr, "It's possible to regain root - something is wrong!, exiting\n");
+//				return -1;
+//			}
+////		}
+
 	}
 #endif
 
@@ -416,6 +508,7 @@ int CDMRGateway::run()
 	LogInfo(HEADER3);
 	LogInfo(HEADER4);
 
+
 	LogMessage("DMRGateway-%s is starting", VERSION);
 	LogMessage("Built %s %s (GitID #%.7s)", __TIME__, __DATE__, gitversion);
 
@@ -424,6 +517,7 @@ int CDMRGateway::run()
 		return 1;
 
 	LogMessage("Waiting for MMDVM to connect.....");
+
 
 	while (!m_killed) {
 		m_configLen = m_repeater->getShortConfig(m_config);
@@ -630,6 +724,7 @@ int CDMRGateway::run()
 
 	LogMessage("DMRGateway-%s is running", VERSION);
 
+
 	while (!m_killed) {
 		if (m_networkXlxEnabled && (m_xlxNetwork != NULL)) {
 			bool connected = m_xlxNetwork->isConnected();
@@ -790,7 +885,7 @@ int CDMRGateway::run()
 				PROCESS_RESULT result = RESULT_UNMATCHED;
 
 				ok2tx = true;
-				
+
                                 if ( dstId == 9000 ) {
                                         storedtg = dstId;
                                         ok2tx=false;
@@ -804,9 +899,9 @@ int CDMRGateway::run()
 					if ( GWMode != 7) 
 					{
 						GWMode=7;
-						SetDMR();
-				//		system("sudo /home/pi-star/DMRGateway-4/setgwmode.sh 7");
-						LogInfo(" Returned from SetDMR-7");
+				//		SetDMR();
+						Reload();
+						LogInfo(" Loaded GWMode 7 Parameters");
 					}
 				}
                                 if ( dstId == 9008 ) {
@@ -814,9 +909,9 @@ int CDMRGateway::run()
 					if ( GWMode != 8) 
 					{
 						GWMode=8;
-						SetDMR();
-			//			system("sudo /home/pi-star/DMRGateway-4/setgwmode.sh 8");
-						LogInfo(" Returned from SetDMR-8");
+				//		SetDMR();
+						Reload();
+						LogInfo(" Loaded GWMode 8 Parameters");
 					}
 				}
 				if ( dstId >= 9001 && dstId <= 9006){
@@ -829,11 +924,11 @@ int CDMRGateway::run()
                                                 locknet = selnet;
                                                 if ( trace && ok2tx ) LogInfo("Network Locked = %d",selnet);
                                                 ok2tx=false;
-//					 if ( GWMode != 1 ) system("/home/pi-star/DMRGateway-4/setgwmode.sh 1");
 					 if ( GWMode != 1 ) {
 						GWMode = 1;
-						SetDMR();
-	//					system("/home/pi-star/DMRGateway-4/setgwmode.sh 1");
+//						SetDMR();
+						Reload();
+						LogInfo(" Loaded GWMode 1 Parameters");
 					}
                                 }
 				// 7 Digit Mode
@@ -864,14 +959,15 @@ int CDMRGateway::run()
 			
 						 if ( GWMode != 8 ) {
 							GWMode = 8;
-		//					system("/home/pi-star/DMRGateway-4/setgwmode.sh 8");
+						Reload();
+						LogInfo(" Loaded GWMode 8 Parameters");
 
-							SetDMR();
+//							SetDMR();
 						}
 				}
 
 				
-                                if ( dstId >= 9000 && dstId <= 9008 ) ok2tx = false;
+                                if ( dstId >= 9000 && dstId <= 9009 ) ok2tx = false;
 
 				if ( GWMode == 0 ) {
                                         if (m_dmrNetwork1 ) net1ok = true;
@@ -3254,16 +3350,69 @@ rf5ok=false;
 rf6ok=false;
 }
 
+
 int Reload()
 {
-const char* iniFile = "/etc/dmrgateway";
+	const char* iniFile = DEFAULT_INI_FILE;
+
+	using namespace std;
+	ifstream myfile8;
+	ifstream myfile7;
+	ifstream myfile1;
+
+	myfile8.open("/etc/dmrgateway8");
+	if ( myfile8 ) {
+        	const char* iniFile8 = "/etc/dmrgateway8";
+		if ( GWMode == 8 ) { 
+			iniFile = iniFile8;
+			LogInfo("..... Loading /etc/dmrgateway8!");
+		}
+	} else {
+		cout<<"/etc/dmrgateway8 file does not exist";
+		LogInfo("..... /etc/dmrgateway8 file does not exist!");
+		LogInfo("..... Unable to switch modes - Run GWConfig.sh");
+		return -1;  
+	 }
+
+
+	myfile7.open("/etc/dmrgateway7");
+	if ( myfile7 ) {
+	        const char* iniFile7 = "/etc/dmrgateway7";
+		if ( GWMode == 7 ) {
+			iniFile = iniFile7;
+			LogInfo("..... Loading /etc/dmrgateway7!");
+		}
+	} else {
+		cout<<"/etc/dmrgateway1 file does not exist";
+		LogInfo("..... /etc/dmrgateway7 file does not exist!");
+		LogInfo("..... Unable to switch modes - Run GWConfig.sh");
+  	 	return -1;
+		}
+
+	myfile1.open("/etc/dmrgateway1");
+	if ( myfile1 ) {
+        	const char* iniFile1 = "/etc/dmrgateway1";
+		if ( GWMode == 1 ) {
+			iniFile = iniFile1;
+			LogInfo("..... Loading /etc/dmrgateway1!");
+		}
+	} else {
+		cout<<"/etc/dmrgateway1 file does not exist";
+		LogInfo("..... /etc/dmrgateway8 file does not exist!");
+		LogInfo("..... Unable to switch modes - Run GWConfig.sh");
+               return -1;
+  	 }
+
+
+ 
 
         int ret = 0;
 
         do {
                 m_signal = 0;
 
-                CDMRGateway* host = new CDMRGateway(std::string(iniFile));
+		CDMRGateway* host = new CDMRGateway(std::string(iniFile));
+
                 ret = host->run();
 
                 delete host;
@@ -3285,24 +3434,17 @@ const char* iniFile = "/etc/dmrgateway";
 
 }
 
-void ReadWrite(){
-//execv( "mount -o rw,remount,rw","/system",NULL);
-//char* argv[] = {"/bin/my", "command", "here", NULL};
-//sudo mount -o remount,rw /
-//char* argv[] = {"sudo mount -o remount,rw", NULL, NULL};
-
-//char* cmd[] = { "sleep", "1", NULL };
-//execvp(argv[0], argv);
-execvp("sudo mount -o remount,rw /", NULL);
-//execv( "mount","-o","rw","remount","rw", "/system", NULL);
-}
-
-
 
 void SetDMR()
 {
-	setgid (0);
-	setuid (0);
+
+return;
+// this function to be deleted
+
+static bool ok2save = false;
+SetUserRoot();
+
+	system("/bin/mount -o remount,rw /");
 
         CSimpleIniA ini;
         ini.SetUnicode();
@@ -3331,22 +3473,23 @@ void SetDMR()
         rc = ini.SetValue("DMR Network 5", "TGRewrite1", "2,1000001,2,1000001,5599999");
         rc = ini.SetValue("DMR Network 6", "TGRewrite1", "2,1000001,2,1000001,5599999");
 
-
         if (rc < 0) {
                 LogInfo("Setting DMR Mode 8 Failed.....");
         }else{
-                LogInfo("Setting DMR Mode 8 Completed - Saving Changes");
+               // LogInfo("Setting DMR Mode 8 Completed - Saving Changes");
          
- 		seteuid (0);
-		system("sudo mount -o remount,rw /");
-
 		rc = ini.SaveFile("/etc/dmrgateway");
                 if (rc < 0) {
                         LogInfo("Saving DMR Mode 8 Failed.....");
+			ok2save=false;
+               }else{
+			 LogInfo("DMR Mode 8 Change Completed");
+			ok2save=true;
                 }
+	system("/bin/mount -o remount,ro /");
+
         }
 
-//      ASSERT_EQ(rc, SI_UPDATED);
    }
 
    if (GWMode == 7) 
@@ -3375,19 +3518,17 @@ void SetDMR()
                 LogInfo("Setting DMR Mode 7 Failed.....");
         }else{
                 LogInfo("Setting DMR Mode 7 Completed - Saving Changes");
-		seteuid (0);
-		system("sudo mount -o remount,rw /");
                 rc = ini.SaveFile("/etc/dmrgateway");
                 if (rc < 0) {
                         LogInfo("Saving DMR Mode 7 Failed.....");
+			ok2save=false;
 
-
-
-
-
-
-
+               }else{
+			 LogInfo("DMR Mode 7 Change Completed");
+			ok2save=true;
                 }
+	system("/bin/mount -o remount,ro /");
+
 	}
    }
   if (GWMode == 1)
@@ -3417,15 +3558,25 @@ void SetDMR()
                 LogInfo("Setting DMR Mode 1 Failed.....");
         }else{
                 LogInfo("Setting DMR Mode 1 Completed - Saving Changes");
-		seteuid (0);
-		system("sudo mount -o remount,rw /");
                 rc = ini.SaveFile("/etc/dmrgateway");
                if (rc < 0) {
                         LogInfo("Saving DMR Mode 1 Failed.....");
+			ok2save=false;
+               }else{
+			 LogInfo("DMR Mode 1 Change Completed");
+			ok2save=true;
                 }
+	system("/bin/mount -o remount,ro /");
         }
-   }
-Reload();
+SetUserMMDVM();   
+}
+
+
+	if ( ok2save == true ) {
+		Reload();
+	}
+
+
 }
 
 
