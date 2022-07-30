@@ -36,7 +36,7 @@ echo -e '\e[1;44m'
 clear
 
 sudo mount -o remount,rw /
-homedir=/home/pi-star/DMRGateway-4/
+homedir=.
 curdir=$(pwd)
 clear
 echo " "
@@ -346,7 +346,7 @@ function CopyBin()
 {
 echo "Running CopyBin"
 
-if [ ! -f /home/pi-star/DMRGateway-4/DMRGateway ]; then
+if [ ! -f ./DMRGateway ]; then
 	sudo mount -o remount,rw /
 	make clean
 	echo "Compiling DMRGateway Files"
@@ -354,7 +354,7 @@ if [ ! -f /home/pi-star/DMRGateway-4/DMRGateway ]; then
 fi
 	sudo mount -o remount,rw /
 	echo "Stopping DMRGateway and MMDVMHost"
-	sudo /home/pi-star/DMRGateway-4/binupdate.sh
+	sudo ./binupdate.sh
 }
 
 function Menu
@@ -391,27 +391,27 @@ case $CHOICE in
         1)
             echo "Editing The DMRGateway Password File"		
 	    if [ !  -f /etc/dmrgwpass ]; then
-		cp /home/pi-star/DMRGateway-4/DMRGateway.pw /etc/dmrgwpass
+		cp ./DMRGateway.pw /etc/dmrgwpass
 	   fi
 		nano /etc/dmrgwpass
 		Menu
             ;;
          2)   echo "You Chose to Install DMRGateway - Basic Mode"
-		sudo cp /home/pi-star/DMRGateway-4/DMRGateway.ini /etc/dmrgateway
+		sudo cp ./DMRGateway.ini /etc/dmrgateway
 		GetSetInfo
 		SetNetworks
 		GWMode1
 		CopyBin
             ;;
          3)   echo "You Chose to Install DMRGateway - 8 Digit Translation Mode"
-		sudo cp /home/pi-star/DMRGateway-4/DMRGateway.ini /etc/dmrgateway
+		sudo cp ./DMRGateway.ini /etc/dmrgateway
 		GetSetInfo
 		SetNetworks
 		GWMode8
 		CopyBin
             ;;
          4)   echo "You Chose to Install DMRGateway - 7 Digit Translation Mode"
-		sudo cp /home/pi-star/DMRGateway-4/DMRGateway.ini /etc/dmrgateway
+		sudo cp ./DMRGateway.ini /etc/dmrgateway
 		GetSetInfo
 		SetNetworks
 		GWMode7
@@ -442,7 +442,7 @@ esac
 sudo mount -o remount,rw /
 pwf=/etc/dmrgwpass
 if [ ! /etc/dmrgwpass ]; then
- sudo cp /home/pi-star/DMRGateway-4/DMRGateway.pw /etc/dmrgwpass
+ sudo cp ./DMRGateway.pw /etc/dmrgwpass
 fi
 Menu
 echo -e '\e[1;40m'
