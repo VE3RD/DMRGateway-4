@@ -81,6 +81,7 @@ read -n 1 -s -r -p "Press any key to Continue"
 function TurnOnGW()
 {
  sudo sed -i '/^\[/h;G;/DMR Network/s/\(Address=\).*/\1'"127.0.0.1"'/m;P;d' /etc/mmdvmhost
+ sudo sed -i '/^\[/h;G;/DMR Network/s/\(Type=\).*/\1Gateway/m;P;d' /etc/mmdvmhost
 }
 
 function GetSetInfo()
